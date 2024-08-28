@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "104277674547",
+    "project_id": "microcheck-c7d98",
+    "storage_bucket": "microcheck-c7d98.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:104277674547:android:f27639ddb265703554b146",
+        "android_client_info": {
+          "package_name": "com.microcheck.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGh1zRjSWQ__xPBVIzVOy8iiuhzOEv-Z4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
