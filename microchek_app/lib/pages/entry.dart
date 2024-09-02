@@ -2,6 +2,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:microchek_app/utils/drawer.dart';
 
 class MyMicroPage extends StatefulWidget {
@@ -125,14 +126,20 @@ class _MyMicroPageState extends State<MyMicroPage> {
 
 // import 'package:flutter/material.dart';
 
-// Pop up for profile edit
-class EditProfilePopup extends StatelessWidget {
+class EditProfilePopup extends StatefulWidget {
+  const EditProfilePopup({super.key});
+
+  @override
+  State<EditProfilePopup> createState() => _EditProfilePopupState();
+}
+
+class _EditProfilePopupState extends State<EditProfilePopup> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
   final TextEditingController contactController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
-  EditProfilePopup({super.key});
+  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -147,33 +154,72 @@ class EditProfilePopup extends StatelessWidget {
         ),
       ),
       content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildTextField(
-              controller: nameController,
-              icon: Icons.business,
-              label: 'Institution Name',
-            ),
-            SizedBox(height: 20),
-            _buildTextField(
-              controller: locationController,
-              icon: Icons.location_on,
-              label: 'Location',
-            ),
-            SizedBox(height: 20),
-            _buildTextField(
-              controller: contactController,
-              icon: Icons.phone,
-              label: 'Contact',
-            ),
-            SizedBox(height: 20),
-            _buildTextField(
-              controller: emailController,
-              icon: Icons.email,
-              label: 'Email',
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildTextField(
+                controller: nameController,
+                icon: Icons.business,
+                label: 'Institution Name',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the institution name';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              _buildTextField(
+                controller: locationController,
+                icon: Icons.location_on,
+                label: 'Location',
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the location';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              _buildTextField(
+                controller: contactController,
+                icon: Icons.phone,
+                label: 'Contact',
+                keyboardType: TextInputType.phone,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the contact number';
+                  }
+                  if (value.length < 10) {
+                    return 'Enter a valid phone number';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              _buildTextField(
+                controller: emailController,
+                icon: Icons.email,
+                label: 'Email',
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the email';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
@@ -186,13 +232,18 @@ class EditProfilePopup extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            backgroundColor: Colors.redAccent.shade100,
           ),
-          child: Text('Cancel'),
+          child: Text(
+            'Cancel',
+            style: TextStyle(color: Colors.redAccent),
+          ),
         ),
         ElevatedButton(
           onPressed: () {
-            // Implement save functionality here
+            if (_formKey.currentState!.validate()) {
+              // Save the profile changes
+              Navigator.of(context).pop();
+            }
           },
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(
@@ -206,23 +257,29 @@ class EditProfilePopup extends StatelessWidget {
     );
   }
 
-  Widget _buildTextField(
-      {required TextEditingController controller,
-      required IconData icon,
-      required String label}) {
-    return TextField(
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required IconData icon,
+    required String label,
+    TextInputType keyboardType = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
       controller: controller,
+      keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: Colors.blue),
+        prefixIcon: Icon(icon, color: Colors.amber),
         labelText: label,
-        labelStyle: TextStyle(color: Colors.grey[700]),
         filled: true,
-        fillColor: Colors.grey[200],
+        // fillColor: Colors.grey[200],
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,
         ),
       ),
+      validator: validator,
     );
   }
 }
