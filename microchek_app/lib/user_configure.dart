@@ -227,10 +227,12 @@ Future<bool> checkInstitution(String uid) async {
 //Function that fetches the institution data:
 Future<Institution> fetchInstitutionData(String id, InstitutionProvider institutionProvider) async{
     
-    DocumentSnapshot userSnapShot = await FirebaseFirestore.instance.collection('intitutions').doc(id).get();
+    DocumentSnapshot userSnapShot = await FirebaseFirestore.instance.collection('institutions').doc(id).get();
     //create the institution object
     String name = userSnapShot['name'],email = userSnapShot['email'],location = userSnapShot['location'],contact = userSnapShot['contact'],uid = id;
-    List<Client> clients = userSnapShot['allClients'].map((instJson) => Client.fromJson(instJson)).toList();
+    List<dynamic> clientsJson = userSnapShot['allClients'] ?? [];
+    List<Client> clients = clientsJson.map((clientJson) => Client.fromJson(clientJson as Map<String, dynamic>)).toList();
+    //List<Client> clients = userSnapShot['allClients'].map((instJson) => Client.fromJson(instJson)).toList();
     Institution currentInstitution = Institution(name, email,uid,location: location,contact: contact,allClients: clients);
     institutionProvider.setCurrentInstitution(currentInstitution);
     
@@ -241,7 +243,7 @@ Future<Institution> fetchInstitutionData(String id, InstitutionProvider institut
 Future<bool> createNewInstitution(String uid,String name,String email,String contact,String location) async {
   bool state = false;
   try{
-    await FirebaseFirestore.instance.collection('intitutions').doc(uid).set({
+    await FirebaseFirestore.instance.collection('institutions').doc(uid).set({
       'name': name,
       'email': email,
       'contact': contact,
