@@ -28,18 +28,32 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   bool _isFound = false;
   bool _isCleared = false;
 
+  // Sample data
+  List<UserRecord> userRecords = [
+    // UserRecord('Company A', 'In Debt'),
+    UserRecord('Company B', 'Cleared'),
+    // UserRecord('Company C', 'In Debt'),
+    // UserRecord('Company D', 'In Debt'),
+    UserRecord('Company E', 'Cleared'),
+  ];
+
   void _validateGhanaCard() {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isValid = true;
         _isFound = _checkIfUserExists(_ghanaCardController.text);
-        // _isCleared = userRecords.every((record) => record.status == 'Cleared');
+        if (_isFound) {
+          _isCleared =
+              userRecords.every((record) => record.status == 'Cleared');
+        } else {
+          _isCleared = true;
+        }
       });
     } else {
       setState(() {
         _isValid = false;
         _isFound = false;
-        // _isCleared = false;
+        _isCleared = false;
       });
     }
   }
@@ -49,20 +63,6 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   }
 
   void _showCompanyDetails(BuildContext context) {
-    // Sample data
-    List<UserRecord> userRecords = [
-      UserRecord('Company A', 'In Debt'),
-      UserRecord('Company B', 'Cleared'),
-      UserRecord('Company C', 'In Debt'),
-      UserRecord('Company D', 'In Debt'),
-      UserRecord('Company E', 'Cleared'),
-    ];
-
-    setState(() {
-      _isCleared =
-          userRecords.every((record) => record.status == 'Cleared');
-    });
-
     if (!_isCleared) {
       showDialog(
         context: context,
@@ -393,7 +393,48 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                       ),
                     ),
                   ),
-                if (_isFound && _isValid && _isCleared)
+                if (_isCleared && _isValid)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: Text(
+                      'Applicant is Cleared!',
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 16,
+                      ),
+                    ),
+                  )
+                else  
+                  Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: !_isValid ? Text(""): Text(
+                        'Applicant is Not Cleared!',
+                        style: TextStyle(
+                          color: !_isCleared ? Colors.red : Colors.green,
+                          fontSize: 16,
+                        ),
+                      )),
+                if (_isCleared && _isFound && _isValid)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showCompanyDetails(context);
+                      },
+                      child: Text('Consider Application'),
+                    ),
+                  ),
+                if (_isCleared && _isFound && _isValid)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        _showCompanyDetails(context);
+                      },
+                      child: Text('Approve Application'),
+                    ),
+                  ),
+                if (_isFound && _isValid && !_isCleared)
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
