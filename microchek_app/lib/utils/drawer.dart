@@ -2,7 +2,10 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:microchek_app/pages/client.dart';
+import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/pages/entry.dart';
+import 'package:microchek_app/pages/start_details.dart';
 
 // import 'package:flutter/material.dart';
 
@@ -61,10 +64,26 @@ class SampleDrawer extends StatelessWidget {
                   )),
                   onTap: () {
                     Navigator.pop(context);
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => GhanaCardValidationPage()));
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.person),
+                  // titleAlignment: ListTileTitleAlignment.center,
+                  leading: Icon(Icons.groups_rounded),
+                  title: Center(
+                      child: Text(
+                    'Clients',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  )),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => ClientPage()));
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.settings),
                   title: Center(
                       child: Text(
                     'My Microfinance',
