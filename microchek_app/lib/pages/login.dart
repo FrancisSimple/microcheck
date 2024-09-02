@@ -24,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       // Perform login logic (e.g., authenticate user)
+      
       try{
          String email = _emailController.text.trim();
           String password = _passwordController.text.trim();

@@ -43,12 +43,12 @@ class Client{
     );
   }
 
-  Future<bool> addInstitution(String uid, InstitutionProvider instProvider,String status) async{
+  Future<bool> addInstitution(Institution inst) async{
     try{
-      Institution inst = await fetchInstitutionData(uid, instProvider);
+      //Institution inst = await fetchInstitutionData(uid, instProvider);
       inst.setStatus(status);
       allInstitutions!.add(inst);
-      return await updateClientData(cardNumber);
+      return await updateClientData(this);
     }
     catch(e){
       debugPrint('Error adding institution to client: $e');
@@ -124,12 +124,12 @@ class Institution{
       allClients!.add(currentClient);
 
 
-      if(await currentClient.addInstitution(uid,instProvider,status) == false){
+      if(await currentClient.addInstitution(this) == false){
         debugPrint('Failed to add a new institution to client');
         return false;
       }
       //update database for client
-      if (await updateClientData(number) == false){
+      if (await updateClientData(currentClient) == false){
         debugPrint('Failed to update client data while adding new client');
         return false;
       }
@@ -149,10 +149,11 @@ class Institution{
             'cardNumber': newClient.cardNumber,
             'status': newClient.status,
             'lastUpdated': newClient.lastUpdated,
-            'allInstitutions': newClient.allInstitutions?.map((inst) => inst.toJson()).toList(),
+            //'allInstitutions': newClient.allInstitutions?.map((inst) => inst.toJson()).toList(),
       });
+      await FirebaseFirestore.instance.collection('clients').doc(number).collection('myinstitutions').doc(uid).set(toJson());
       newClient = await fetchClientData(number);
-      if(await newClient.addInstitution(uid,instProvider,status) == false){
+      if(await newClient.addInstitution(this) == false){
         debugPrint('Failed to add a new institution to client');
         return false;
       }
@@ -162,7 +163,7 @@ class Institution{
         return false;
       }
       //update database for client
-      if (await updateClientData(number) == false){
+      if (await updateClientData(newClient) == false){
         debugPrint('Failed to update client data while adding new client');
         return false;
       }
@@ -248,8 +249,16 @@ Future<Institution> fetchInstitutionData(String id, InstitutionProvider institut
     DocumentSnapshot userSnapShot = await FirebaseFirestore.instance.collection('institutions').doc(id).get();
     //create the institution object
     String name = userSnapShot['name'],email = userSnapShot['email'],location = userSnapShot['location'],contact = userSnapShot['contact'],uid = id;
-    List<dynamic> clientsJson = userSnapShot['allClients'] ?? [];
-    List<Client> clients = clientsJson.map((clientJson) => Client.fromJson(clientJson as Map<String, dynamic>)).toList();
+    List<Client> clients = [];
+    final clientSnap = await FirebaseFirestore.instance.collection('institutions').doc(id).collection('myclients').get();
+    if(clientSnap.docs.length > 1){
+      clients = clientSnap.docs.where((doc) {
+        return doc.id != 'default'; // Adjust this condition as needed
+      }).map((doc) => Client.fromJson(doc.data() as Map<String, dynamic>)).toList();
+    }
+    
+    //List<dynamic> clientsJson = userSnapShot['allClients'] ?? [];
+    //List<Client> clients = clientsJson.map((clientJson) => Client.fromJson(clientJson as Map<String, dynamic>)).toList();
     //List<Client> clients = userSnapShot['allClients'].map((instJson) => Client.fromJson(instJson)).toList();
     Institution currentInstitution = Institution(name, email,uid,location: location,contact: contact,allClients: clients);
     institutionProvider.setCurrentInstitution(currentInstitution);
@@ -265,9 +274,11 @@ Future<bool> createNewInstitution(String uid,String name,String email,String con
       'name': name,
       'email': email,
       'contact': contact,
-      'allClients': [],
       'location': location
     });
+    //String name = userSnapShot['name'],email = userSnapShot['email'],location = userSnapShot['location'],contact = userSnapShot['contact'],uid = id;
+    
+    await FirebaseFirestore.instance.collection('institutions').doc(uid).collection('myclients').doc('default').set({'name':'default'});
     state = true;
     }
   catch(e){
@@ -276,6 +287,8 @@ Future<bool> createNewInstitution(String uid,String name,String email,String con
 
   return state;
 }
+
+
 
 
 //Function that fetches the client data
@@ -297,21 +310,15 @@ Future<Client> fetchClientData(String number) async {
   String lastUpdated = data['lastUpdated'] ?? ''; // Provide a default value if 'lastUpdated' is missing
 
   // Safely handle the 'allInstitutions' field
-  List<Institution> institutions = [];
-
+  
+  final institutionSnap = await FirebaseFirestore.instance.collection('clients').doc(number).collection('myinstitutions').get();
   // Check if 'allInstitutions' exists, is not null, and is a List
-  if (data.containsKey('allInstitutions') && data['allInstitutions'] != null) {
-    if (data['allInstitutions'] is List) {
-      // Map each item in the list to an Institution object, if the list is empty, it will just stay as an empty list
-      institutions = (data['allInstitutions'] as List)
-          .map((instJson) => Institution.fromJson(instJson as Map<String, dynamic>))
-          .toList();
-    } else {
-      // Log or handle the unexpected type for 'allInstitutions'
-      debugPrint('Expected a list for allInstitutions, but got a different type.');
+  List<Institution> institutions = [];
+  if(institutionSnap.docs.length > 1){
+      institutions = institutionSnap.docs.where((doc) {
+        return doc.id != 'default'; // Adjust this condition as needed
+      }).map((doc) => Institution.fromJson(doc.data() as Map<String, dynamic>)).toList();
     }
-  }
-
   // Create the Client object
   Client currentClient = Client(name, number, status: status, lastUpdated: lastUpdated, allInstitutions: institutions);
 
@@ -319,17 +326,23 @@ Future<Client> fetchClientData(String number) async {
 }
 
 
-Future<bool> updateClientData(String number) async {
+Future<bool> updateClientData(Client client) async {
   bool state = false;
   try{
-  Client currentClient = await fetchClientData(number);
-  await FirebaseFirestore.instance.collection('clients').doc(number).update({
-    'name': currentClient.name,
-    'cardNumber': currentClient.cardNumber,
-    'status': currentClient.status,
-    'lastUpdated': currentClient.lastUpdated,
-    'allInstitutions': currentClient.allInstitutions?.map((inst) => inst.toJson()).toList()
+  //Client currentClient = await fetchClientData(number);
+  await FirebaseFirestore.instance.collection('clients').doc(client.cardNumber).update({
+    'name': client.name,
+    'cardNumber': client.cardNumber,
+    'status': client.status,
+    'lastUpdated': client.lastUpdated,
+    'allInstitutions': client.allInstitutions?.map((inst) => inst.toJson()).toList()
   });
+  final institutionCollection = FirebaseFirestore.instance.collection('clients').doc(client.cardNumber).collection('myinstitutions');
+  for (Institution inst in client.allInstitutions!){
+      Map<String, dynamic> institutionData = inst.toJson();
+      final document = await institutionCollection.doc(inst.uid).get();
+      (document.exists) ? await institutionCollection.doc(inst.uid).update(institutionData): await institutionCollection.doc(inst.uid).set(institutionData);
+  }
   state = true;
   }
   catch(e){
@@ -349,9 +362,15 @@ Future<bool> updateInstitutionData(String uid,InstitutionProvider instProvider) 
     'name': currentInstitution.name,
     'email': currentInstitution.email,
     'contact': currentInstitution.contact,
-    'allClients': currentInstitution.allClients?.map((inst) => inst.toJson()).toList(),
+    //'allClients': currentInstitution.allClients?.map((inst) => inst.toJson()).toList(),
     'location': currentInstitution.location
   });
+  final clientCollection = FirebaseFirestore.instance.collection('institutions').doc(uid).collection('myclients');
+  for (Client client in currentInstitution.allClients!){
+      Map<String, dynamic> clientData = client.toJson();
+      final document = await clientCollection.doc(client.cardNumber).get();
+      (document.exists) ? await clientCollection.doc(client.cardNumber).update(clientData): await clientCollection.doc(client.cardNumber).set(clientData);
+  }
   return true;
   }
   catch(e){
