@@ -1,4 +1,4 @@
-// pages/dashboard.dart
+// home.dart
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
@@ -43,7 +43,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   }
 
   bool _checkIfUserExists(String cardNumber) {
-    return cardNumber == "GHA-12345678-0"; // Example Ghana Card number
+    return cardNumber == "GHA-123456789-0"; // Example Ghana Card number
   }
 
   void _showCompanyDetails(BuildContext context) {
@@ -185,6 +185,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                             ? Colors.green
                                             : Colors.red,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 10,
                                   ),
                                 ),
                               ),
@@ -381,13 +382,13 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                 TextFormField(
                   controller: _ghanaCardController,
                   keyboardType: TextInputType.text,
-                  maxLength: 14,
+                  maxLength: 15,
                   inputFormatters: [
                     GhanaCardNumberFormatter(),
                   ],
                   decoration: InputDecoration(
                     labelText: 'Ghana Card Number',
-                    hintText: 'GHA-00000000-0',
+                    hintText: 'GHA-000000000-0',
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) {
@@ -455,7 +456,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
   bool _isValidGhanaCardNumber(String number) {
     // Implement your validation logic here.
-    String pattern = r'GHA-\d{8}-\d{1}$';
+    String pattern = r'GHA-\d{9}-\d{1}$';
     RegExp regExp = RegExp(pattern);
     return regExp.hasMatch(number);
   }
@@ -486,12 +487,12 @@ class GhanaCardNumberFormatter extends TextInputFormatter {
     newNumberValue = newNumberValue.replaceAll(RegExp(r'[^0-9]'), '');
 
     // Add the formatted number to the formatted string
-    if (newNumberValue.length < 8) {
+    if (newNumberValue.length < 9) {
       formattedString.write(newNumberValue);
     } else {
-      formattedString.write('${newNumberValue.substring(0, 8)}-');
-      if (newNumberValue.length > 8) {
-        formattedString.write(newNumberValue.substring(8));
+      formattedString.write('${newNumberValue.substring(0, 9)}-');
+      if (newNumberValue.length > 9) {
+        formattedString.write(newNumberValue.substring(9));
       }
     }
 
