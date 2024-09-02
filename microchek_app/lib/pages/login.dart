@@ -41,15 +41,15 @@ class _LoginPageState extends State<LoginPage> {
             debugPrint('fetching user data');
             await fetchInstitutionData(user.uid, institutionProvider);
             debugPrint('done fetching');
+            if (mounted) {
+              Navigator.pop(context);
+            }
             Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) => GhanaCardValidationPage(),
             ));
           } else {
             debugPrint('institution does not exist');
           }
-        }
-        if (mounted) {
-          Navigator.pop(context);
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

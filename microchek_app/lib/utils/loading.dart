@@ -18,5 +18,9 @@ class LoadingScreen extends StatelessWidget {
 }
 
 Future<T?> loadingDialog<T>(BuildContext context) {
-  return showDialog(context: context, builder: (context) => LoadingScreen());
+  return showDialog(
+    context: context,
+    builder: (context) => LoadingScreen(),
+    barrierDismissible: false,
+  );
 }
