@@ -151,8 +151,9 @@ class Institution{
             'lastUpdated': newClient.lastUpdated,
             //'allInstitutions': newClient.allInstitutions?.map((inst) => inst.toJson()).toList(),
       });
+      allClients!.add(newClient);
       await FirebaseFirestore.instance.collection('clients').doc(number).collection('myinstitutions').doc(uid).set(toJson());
-      newClient = await fetchClientData(number);
+      //newClient = await fetchClientData(number);
       if(await newClient.addInstitution(this) == false){
         debugPrint('Failed to add a new institution to client');
         return false;
