@@ -279,18 +279,45 @@ Future<bool> createNewInstitution(String uid,String name,String email,String con
 
 
 //Function that fetches the client data
-Future<Client> fetchClientData(String number) async{
-    DocumentSnapshot userSnapShot = await FirebaseFirestore.instance.collection('clients').doc(number).get();
-    //create the institution object
-    String name = userSnapShot['name'], status = userSnapShot['status'];
-    String lastUpdated= userSnapShot['lastUpdated'];
-    List<Institution> institutions = userSnapShot['allInstitutions'].map((instJson) => Institution.fromJson(instJson)).toList();
-    Client currentClient = Client(name, number,status: status,lastUpdated: lastUpdated,allInstitutions: institutions);
+Future<Client> fetchClientData(String number) async {
+  // Fetch the document snapshot
+  DocumentSnapshot userSnapShot = await FirebaseFirestore.instance.collection('clients').doc(number).get();
 
+  // Check if the snapshot exists and contains data
+  if (!userSnapShot.exists || userSnapShot.data() == null) {
+    throw Exception('Client not found or data is null');
+  }
 
-    return currentClient;  
-    
+  // Extract data safely using a map
+  Map<String, dynamic> data = userSnapShot.data() as Map<String, dynamic>;
+
+  // Extract the required fields with null checks and default values
+  String name = data['name'] ?? 'Unknown'; // Provide a default value if 'name' is missing
+  String status = data['status'] ?? 'Unknown'; // Provide a default value if 'status' is missing
+  String lastUpdated = data['lastUpdated'] ?? ''; // Provide a default value if 'lastUpdated' is missing
+
+  // Safely handle the 'allInstitutions' field
+  List<Institution> institutions = [];
+
+  // Check if 'allInstitutions' exists, is not null, and is a List
+  if (data.containsKey('allInstitutions') && data['allInstitutions'] != null) {
+    if (data['allInstitutions'] is List) {
+      // Map each item in the list to an Institution object, if the list is empty, it will just stay as an empty list
+      institutions = (data['allInstitutions'] as List)
+          .map((instJson) => Institution.fromJson(instJson as Map<String, dynamic>))
+          .toList();
+    } else {
+      // Log or handle the unexpected type for 'allInstitutions'
+      debugPrint('Expected a list for allInstitutions, but got a different type.');
+    }
+  }
+
+  // Create the Client object
+  Client currentClient = Client(name, number, status: status, lastUpdated: lastUpdated, allInstitutions: institutions);
+
+  return currentClient;
 }
+
 
 Future<bool> updateClientData(String number) async {
   bool state = false;
@@ -303,7 +330,7 @@ Future<bool> updateClientData(String number) async {
     'lastUpdated': currentClient.lastUpdated,
     'allInstitutions': currentClient.allInstitutions?.map((inst) => inst.toJson()).toList()
   });
-  true;
+  state = true;
   }
   catch(e){
     debugPrint('Failed to update client data due to: $e');
@@ -325,7 +352,7 @@ Future<bool> updateInstitutionData(String uid,InstitutionProvider instProvider) 
     'allClients': currentInstitution.allClients?.map((inst) => inst.toJson()).toList(),
     'location': currentInstitution.location
   });
-  
+  return true;
   }
   catch(e){
     debugPrint('Failed to update client data due to: $e');

@@ -232,7 +232,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
     } else {}
   }
 
-  void _showAddUserForm(BuildContext context, String ghanaCardNumber) {
+  void _showAddUserForm(BuildContext context, String ghanaCardNumber, Institution institution, InstitutionProvider instProvider) {
     final formKey = GlobalKey<FormState>();
     final TextEditingController nameController = TextEditingController();
     // final TextEditingController emailController = TextEditingController();
@@ -318,9 +318,13 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
             ),
             ElevatedButton(
               child: Text('Add Applicant'),
-              onPressed: () {
+              onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
                   // Implement the logic to add the user to the system here
+                  await institution.addClient(_ghanaCardController.text.trim(), 'cleared', instProvider,name: nameController.text.trim());
+                  ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Client added Successfully')),
+            );
                   Navigator.of(context).pop(); // Close the dialog after adding
                 }
               },
@@ -334,7 +338,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         padding: const EdgeInsets.only(top: 20.0),
         child: ElevatedButton(
           onPressed: () {
-            _showAddUserForm(context, ghanaCardController.text);
+            _showAddUserForm(context, ghanaCardController.text, institution, instProvider);
           },
           child: Text('Add Applicant'),
         ),
@@ -493,7 +497,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     padding: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        _showAddUserForm(context, _ghanaCardController.text);
+                        _showAddUserForm(context, _ghanaCardController.text,currentInst!,instProvider);
                       },
                       child: Text('Add Applicant'),
                     ),
@@ -507,7 +511,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         onPressed: () {
           // Implement the functionality to add a user to the system here
 
-          _showAddUserForm(context, _ghanaCardController.text);
+          _showAddUserForm(context, _ghanaCardController.text,currentInst!, instProvider);
         },
         tooltip: 'Add Applicant',
         child: Icon(Icons.person_add),
