@@ -1,4 +1,4 @@
-// login.dart
+// pages/login.dart
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
@@ -157,20 +157,15 @@ class _LoginPageState extends State<LoginPage> {
                                 Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => GhanaCardValidationPage()));
                               },
                               style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(vertical: 15.0),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30.0),
-                                ),
+                                // padding: EdgeInsets.symmetric(vertical: 15.0),
+                                // shape: RoundedRectangleBorder(
+                                //   borderRadius: BorderRadius.circular(30.0),
+                                // ),
                               ),
-                              child: Container(
-                                margin: EdgeInsets.symmetric(
-                                  vertical: 5,
-                                  horizontal: 25,
-                                ),
-                                child: Text(
+                              child: Text(
                                   "Login",
                                 ),
-                              ),
+                              
                             ),
                           ),
                           SizedBox(

@@ -17,7 +17,8 @@ class SampleDrawer extends StatelessWidget {
           // Drawer Header with User Info
           SizedBox(
             width: MediaQuery.sizeOf(context).width,
-            // height: 250,
+            // height: 100,
+            height: 250,
             child: DrawerHeader(
               margin: EdgeInsets.zero,
               decoration: BoxDecoration(
@@ -53,14 +54,22 @@ class SampleDrawer extends StatelessWidget {
                 ListTile(
                   // titleAlignment: ListTileTitleAlignment.center,
                   leading: Icon(Icons.home),
-                  title: Center(child: Text('Applicant Validation')),
+                  title: Center(
+                      child: Text(
+                    'Applicant Validation',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  )),
                   onTap: () {
                     Navigator.pop(context);
                   },
                 ),
                 ListTile(
                   leading: Icon(Icons.person),
-                  title: Center(child: Text('My Microfinance')),
+                  title: Center(
+                      child: Text(
+                    'My Microfinance',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  )),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.of(context).push(
@@ -81,7 +90,11 @@ class SampleDrawer extends StatelessWidget {
           // Logout Button fixed at the bottom
           ListTile(
             leading: Icon(Icons.logout),
-            title: Center(child: Text('Logout')),
+            title: Center(
+                child: Text(
+              'Logout',
+              style: Theme.of(context).textTheme.titleMedium,
+            )),
             onTap: () {
               Navigator.pop(context);
               // Implement your logout functionality here
