@@ -7,11 +7,10 @@ import 'package:microchek_app/utils/drawer.dart';
 
 class UserRecord {
   String company;
-  int owed;
-  int paid;
+
   String status;
 
-  UserRecord(this.company, this.owed, this.paid, this.status);
+  UserRecord(this.company, this.status);
 }
 
 class GhanaCardValidationPage extends StatefulWidget {
@@ -27,17 +26,20 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   final TextEditingController _ghanaCardController = TextEditingController();
   bool _isValid = false;
   bool _isFound = false;
+  bool _isCleared = false;
 
   void _validateGhanaCard() {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isValid = true;
         _isFound = _checkIfUserExists(_ghanaCardController.text);
+        // _isCleared = userRecords.every((record) => record.status == 'Cleared');
       });
     } else {
       setState(() {
         _isValid = false;
         _isFound = false;
+        // _isCleared = false;
       });
     }
   }
@@ -49,175 +51,148 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   void _showCompanyDetails(BuildContext context) {
     // Sample data
     List<UserRecord> userRecords = [
-      UserRecord('Company A', 1000, 500, 'In Debt'),
-      UserRecord('Company B', 200, 200, 'Cleared'),
-      UserRecord('Company C', 500, 0, 'In Debt'),
-      UserRecord('Company D', 800, 300, 'In Debt'),
-      UserRecord('Company E', 100, 100, 'Cleared'),
+      UserRecord('Company A', 'In Debt'),
+      UserRecord('Company B', 'Cleared'),
+      UserRecord('Company C', 'In Debt'),
+      UserRecord('Company D', 'In Debt'),
+      UserRecord('Company E', 'Cleared'),
     ];
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          insetPadding: EdgeInsets.all(10),
-          contentPadding: EdgeInsets.all(10),
-          title: Text('Applicant Records'),
-          content: SizedBox(
-            width: MediaQuery.sizeOf(context).width,
-            height: MediaQuery.sizeOf(context).height,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Table(
-                  columnWidths: const {
-                    0: FlexColumnWidth(3), // Company column wider
-                    1: FlexColumnWidth(2),
-                    2: FlexColumnWidth(2),
-                    3: FlexColumnWidth(2),
-                    4: FlexColumnWidth(2)
-                  },
-                  border: TableBorder(
-                    horizontalInside:
-                        BorderSide(width: 1, color: Colors.grey[300]!),
-                  ),
-                  children: [
-                    TableRow(
-                      decoration: BoxDecoration(
-                          color: Colors.amber[200],
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(10),
-                            topRight: Radius.circular(10),
-                          )),
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Company',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Debt',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Paid',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Status',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Contact',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
+    setState(() {
+      _isCleared =
+          userRecords.every((record) => record.status == 'Cleared');
+    });
+
+    if (!_isCleared) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            insetPadding: EdgeInsets.all(10),
+            contentPadding: EdgeInsets.all(10),
+            title: Text('Applicant Records'),
+            content: SizedBox(
+              width: MediaQuery.sizeOf(context).width,
+              height: MediaQuery.sizeOf(context).height,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Table(
+                    columnWidths: const {
+                      0: FlexColumnWidth(3), // Company column wider
+                      1: FlexColumnWidth(2),
+                      2: FlexColumnWidth(2),
+                    },
+                    border: TableBorder(
+                      horizontalInside:
+                          BorderSide(width: 1, color: Colors.grey[300]!),
                     ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Expanded(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: userRecords.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return Table(
-                        columnWidths: const {
-                          0: FlexColumnWidth(3), // Company column wider
-                          1: FlexColumnWidth(2),
-                          2: FlexColumnWidth(2),
-                          3: FlexColumnWidth(2),
-                          4: FlexColumnWidth(2)
-                        },
-                        defaultVerticalAlignment:
-                            TableCellVerticalAlignment.middle,
-                        border: TableBorder(
-                          horizontalInside:
-                              BorderSide(width: 1, color: Colors.amber[300]!),
-                        ),
+                    children: [
+                      TableRow(
+                        decoration: BoxDecoration(
+                            color: Colors.amber[200],
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(10),
+                              topRight: Radius.circular(10),
+                            )),
                         children: [
-                          TableRow(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(userRecords[index].company),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Company',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Status',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                'Contact',
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text('${userRecords[index].owed}'),
-                                ),
-                              ),
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text('${userRecords[index].paid}'),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                  userRecords[index].status,
-                                  style: TextStyle(
-                                    color:
-                                        userRecords[index].status == 'Cleared'
-                                            ? Colors.green
-                                            : Colors.red,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 10,
-                                  ),
-                                ),
-                              ),
-                              Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: IconButton(
-                                      onPressed: () {},
-                                      icon: const Icon(Icons.call)),
-                                ),
-                              )
-                            ],
+                            ),
                           ),
                         ],
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  SizedBox(height: 10),
+                  Expanded(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: userRecords.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Table(
+                          columnWidths: const {
+                            0: FlexColumnWidth(3), // Company column wider
+                            1: FlexColumnWidth(2),
+                            2: FlexColumnWidth(2),
+                          },
+                          defaultVerticalAlignment:
+                              TableCellVerticalAlignment.middle,
+                          border: TableBorder(
+                            horizontalInside:
+                                BorderSide(width: 1, color: Colors.amber[300]!),
+                          ),
+                          children: [
+                            TableRow(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(userRecords[index].company),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    userRecords[index].status,
+                                    style: TextStyle(
+                                      color:
+                                          userRecords[index].status == 'Cleared'
+                                              ? Colors.green
+                                              : Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                      // fontSize: 10,
+                                    ),
+                                  ),
+                                ),
+                                Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8),
+                                    child: IconButton(
+                                        onPressed: () {},
+                                        icon: const Icon(Icons.call)),
+                                  ),
+                                )
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
+            actions: <Widget>[
+              TextButton(
+                child: Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {}
   }
 
   void _showAddUserForm(BuildContext context, String ghanaCardNumber) {
@@ -418,7 +393,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                       ),
                     ),
                   ),
-                if (_isFound && _isValid)
+                if (_isFound && _isValid && _isCleared)
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
@@ -446,7 +421,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Implement the functionality to add a user to the system here
-          
+
           _showAddUserForm(context, _ghanaCardController.text);
         },
         tooltip: 'Add Applicant',
