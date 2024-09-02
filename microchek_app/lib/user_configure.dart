@@ -202,8 +202,8 @@ Future<bool> checkUserLogin(String email, String password, BuildContext context)
   return false;
 }
 
-Future<User?> getUserCredentials() async{
-    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: 'test@gmail.com',password:'francis');
+Future<User?> getUserCredentials(String email,String password) async{
+    UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email,password: password);
     User? user = userCredential.user; 
     return user;
 }
@@ -219,7 +219,7 @@ Future<bool> checkClientExists(String number) async {
 //Check if the institution exists
 
 Future<bool> checkInstitution(String uid) async {
-  DocumentSnapshot userSnapShot = await FirebaseFirestore.instance.collection('intitutions').doc(uid).get();
+  DocumentSnapshot userSnapShot = await FirebaseFirestore.instance.collection('institutions').doc(uid).get();
   return userSnapShot.exists;
 }
 
