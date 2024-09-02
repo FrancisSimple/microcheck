@@ -433,7 +433,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     padding: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        _showAddUserForm(context,_ghanaCardController.text);
+                        _showAddUserForm(context, _ghanaCardController.text);
                       },
                       child: Text('Add Applicant'),
                     ),
@@ -446,6 +446,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Implement the functionality to add a user to the system here
+          
           _showAddUserForm(context, _ghanaCardController.text);
         },
         tooltip: 'Add Applicant',
