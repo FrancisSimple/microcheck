@@ -235,7 +235,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   void _showAddUserForm(BuildContext context, String ghanaCardNumber) {
     final formKey = GlobalKey<FormState>();
     final TextEditingController nameController = TextEditingController();
-    final TextEditingController emailController = TextEditingController();
+    // final TextEditingController emailController = TextEditingController();
     final TextEditingController ghanaCardController = TextEditingController(
         text: ghanaCardNumber); // Pre-fill Ghana Card Number
     final TextEditingController phoneController = TextEditingController();
@@ -266,28 +266,20 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     },
                   ),
                   SizedBox(height: 10),
-                  _buildTextFormField(
-                    'Email',
-                    Icons.email,
-                    controller: emailController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter an email';
-                      } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                          .hasMatch(value)) {
-                        return 'Please enter a valid email address';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  _buildTextFormField(
-                    'Ghana Card Number',
-                    Icons.payment_rounded,
-                    controller: ghanaCardController,
-                    enabled:
-                        false, // Keep this field disabled as it's auto-filled
-                  ),
+                  // _buildTextFormField(
+                  //   'Email',
+                  //   Icons.email,
+                  //   controller: emailController,
+                  //   validator: (value) {
+                  //     if (value == null || value.isEmpty) {
+                  //       return 'Please enter an email';
+                  //     } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                  //         .hasMatch(value)) {
+                  //       return 'Please enter a valid email address';
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
                   SizedBox(height: 10),
                   _buildTextFormField(
                     'Phone Number',
@@ -301,6 +293,14 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                       }
                       return null;
                     },
+                  ),
+                  SizedBox(height: 10),
+                  _buildTextFormField(
+                    'Ghana Card Number',
+                    Icons.payment_rounded,
+                    controller: ghanaCardController,
+                    enabled:
+                        false, // Keep this field disabled as it's auto-filled
                   ),
                 ],
               ),
