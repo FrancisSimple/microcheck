@@ -102,7 +102,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              'Owed',
+                              'Debt',
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -219,30 +219,76 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
     );
   }
 
-  void _showAddUserForm(BuildContext context) {
+  void _showAddUserForm(BuildContext context, String ghanaCardNumber) {
+    final _formKey = GlobalKey<FormState>();
+    final TextEditingController _nameController = TextEditingController();
+    final TextEditingController _emailController = TextEditingController();
+    final TextEditingController _ghanaCardController = TextEditingController(
+        text: ghanaCardNumber); // Pre-fill Ghana Card Number
+    final TextEditingController _phoneController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            'Add User to System',
+            'Add Applicant',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           content: SingleChildScrollView(
             child: Form(
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  _buildTextFormField('Name', Icons.person),
-                  SizedBox(height: 10),
-                  _buildTextFormField('Email', Icons.email),
+                  _buildTextFormField(
+                    'Name',
+                    Icons.person,
+                    controller: _nameController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a name';
+                      }
+                      return null;
+                    },
+                  ),
                   SizedBox(height: 10),
                   _buildTextFormField(
-                      'Ghana Card Number', Icons.payment_rounded,
-                      enabled: false),
+                    'Email',
+                    Icons.email,
+                    controller: _emailController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter an email';
+                      } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                          .hasMatch(value)) {
+                        return 'Please enter a valid email address';
+                      }
+                      return null;
+                    },
+                  ),
                   SizedBox(height: 10),
-                  _buildTextFormField('Phone Number', Icons.phone),
-                  // Add more fields as necessary
+                  _buildTextFormField(
+                    'Ghana Card Number',
+                    Icons.payment_rounded,
+                    controller: _ghanaCardController,
+                    enabled:
+                        false, // Keep this field disabled as it's auto-filled
+                  ),
+                  SizedBox(height: 10),
+                  _buildTextFormField(
+                    'Phone Number',
+                    Icons.phone,
+                    controller: _phoneController,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a phone number';
+                      } else if (value.length < 10) {
+                        return 'Phone number must be at least 10 digits';
+                      }
+                      return null;
+                    },
+                  ),
                 ],
               ),
             ),
@@ -258,31 +304,53 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
               },
             ),
             ElevatedButton(
-              child: Text('Add User'),
+              child: Text('Add Applicant'),
               onPressed: () {
-                // Implement the logic to add the user to the system here
-                Navigator.of(context).pop(); // Close the dialog after adding
+                if (_formKey.currentState?.validate() ?? false) {
+                  // Implement the logic to add the user to the system here
+                  Navigator.of(context).pop(); // Close the dialog after adding
+                }
               },
             ),
           ],
         );
       },
     );
+    if (!_isFound && _isValid) {
+      Padding(
+        padding: const EdgeInsets.only(top: 20.0),
+        child: ElevatedButton(
+          onPressed: () {
+            _showAddUserForm(context, _ghanaCardController.text);
+          },
+          child: Text('Add Applicant'),
+        ),
+      );
+    }
   }
 
-  Widget _buildTextFormField(String labelText, IconData icon, {bool? enabled}) {
+// Replace the existing _showAddUserForm call with the new one
+
+  Widget _buildTextFormField(
+    String labelText,
+    IconData iconData, {
+    TextEditingController? controller,
+    bool enabled = true,
+    String? Function(String?)? validator,
+  }) {
     return TextFormField(
+      controller: controller,
+      enabled: enabled,
       decoration: InputDecoration(
         labelText: labelText,
-        prefixIcon: Icon(icon),
-        enabled: enabled ?? true,
-        
+        prefixIcon: Icon(iconData),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(10.0),
         ),
         filled: true,
-        // fillColor: Colors.grey[100],
+        // fillColor: enabled ? Colors.white : Colors.grey[300],
       ),
+      validator: validator,
     );
   }
 
@@ -341,10 +409,10 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     padding: const EdgeInsets.only(top: 20.0),
                     child: Text(
                       _isFound
-                          ? 'User found in the system!'
-                          : 'User not found in the system!',
+                          ? 'Existing Records Found!'
+                          : 'No Existing Records!',
                       style: TextStyle(
-                        color: _isFound ? Colors.green : Colors.red,
+                        color: _isFound ? Colors.red : Colors.green,
                         fontSize: 16,
                       ),
                     ),
@@ -364,9 +432,9 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     padding: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        _showAddUserForm(context);
+                        _showAddUserForm(context,_ghanaCardController.text);
                       },
-                      child: Text('Add User to System'),
+                      child: Text('Add Applicant'),
                     ),
                   ),
               ],
@@ -377,8 +445,9 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Implement the functionality to add a user to the system here
+          _showAddUserForm(context, _ghanaCardController.text);
         },
-        tooltip: 'Add User',
+        tooltip: 'Add Applicant',
         child: Icon(Icons.person_add),
       ),
     );
