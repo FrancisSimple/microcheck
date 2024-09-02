@@ -29,7 +29,9 @@ class _MyMicroPageState extends State<MyMicroPage> {
             Center(
               child: CircleAvatar(
                 radius: 40,
-                child: Icon(Icons.account_balance),
+                child: Icon(
+                  Icons.account_balance,
+                ),
                 // backgroundImage: AssetImage('assets/logo.png'), // Add a logo or relevant image
               ),
             ),
@@ -69,7 +71,10 @@ class _MyMicroPageState extends State<MyMicroPage> {
                             },
                           );
                         },
-                        icon: Icon(Icons.edit),
+                        icon: Icon(
+                          Icons.edit,
+                          color: Colors.amber,
+                        ),
                         label: Text('Edit Profile'),
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(

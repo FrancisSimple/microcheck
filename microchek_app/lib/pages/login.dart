@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/user_configure.dart';
+import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -24,36 +25,41 @@ class _LoginPageState extends State<LoginPage> {
   void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       // Perform login logic (e.g., authenticate user)
-      try{
-         String email = _emailController.text.trim();
-          String password = _passwordController.text.trim();
-          User? user = await getUserCredentials(email,password);
-          if(user != null){
-            ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Logging in...')),
-            );
-            if(await checkInstitution(user.uid)){
-              debugPrint('institution exists');
-              InstitutionProvider institutionProvider = Provider.of<InstitutionProvider>(context,listen:false);
-              debugPrint('fetching user data');
-              await fetchInstitutionData(user.uid, institutionProvider);
-              debugPrint('done fetching');
-              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => GhanaCardValidationPage(),));
-          }
-          else{
+      try {
+        String email = _emailController.text.trim();
+        String password = _passwordController.text.trim();
+        loadingDialog(context);
+        User? user = await getUserCredentials(email, password);
+        if (user != null) {
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text('Logging in...')),
+          // );
+          if (await checkInstitution(user.uid)) {
+            debugPrint('institution exists');
+            InstitutionProvider institutionProvider =
+                Provider.of<InstitutionProvider>(context, listen: false);
+            debugPrint('fetching user data');
+            await fetchInstitutionData(user.uid, institutionProvider);
+            debugPrint('done fetching');
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => GhanaCardValidationPage(),
+            ));
+          } else {
             debugPrint('institution does not exist');
           }
-      }
-  
-      }
-      catch(e){
+        }
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Sorry, Account not found.')),
-            );
+          SnackBar(content: Text('Sorry, Account not found.')),
+        );
+        if (mounted) {
+          Navigator.pop(context);
+        }
         debugPrint('Error logging in: $e');
       }
-     
-      
 
       //Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => GhanaCardValidationPage(),));
       // ScaffoldMessenger.of(context).showSnackBar(
@@ -186,20 +192,23 @@ class _LoginPageState extends State<LoginPage> {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 20.0),
                             child: ElevatedButton(
-                              onPressed: (){
+                              onPressed: () {
+                                // showDialog(
+                                //   context: context,
+                                //   builder: (context) => LoadingScreen(),
+                                // );
                                 _handleLogin();
                                 //Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => GhanaCardValidationPage()));
                               },
                               style: ElevatedButton.styleFrom(
-                                // padding: EdgeInsets.symmetric(vertical: 15.0),
-                                // shape: RoundedRectangleBorder(
-                                //   borderRadius: BorderRadius.circular(30.0),
-                                // ),
-                              ),
+                                  // padding: EdgeInsets.symmetric(vertical: 15.0),
+                                  // shape: RoundedRectangleBorder(
+                                  //   borderRadius: BorderRadius.circular(30.0),
+                                  // ),
+                                  ),
                               child: Text(
-                                  "Login",
-                                ),
-                              
+                                "Login",
+                              ),
                             ),
                           ),
                           SizedBox(
