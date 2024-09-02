@@ -32,8 +32,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   List<UserRecord> userRecords = [
     // UserRecord('Company A', 'In Debt'),
     UserRecord('Company B', 'Cleared'),
-    // UserRecord('Company C', 'In Debt'),
-    // UserRecord('Company D', 'In Debt'),
+    UserRecord('Company C', 'In Debt'),
+    UserRecord('Company D', 'In Debt'),
     UserRecord('Company E', 'Cleared'),
   ];
 
@@ -80,8 +80,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                 children: [
                   Table(
                     columnWidths: const {
-                      0: FlexColumnWidth(3), // Company column wider
-                      1: FlexColumnWidth(2),
+                      0: FlexColumnWidth(2), // Company column wider
+                      1: FlexColumnWidth(3),
                       2: FlexColumnWidth(2),
                     },
                     border: TableBorder(
@@ -107,7 +107,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              'Status',
+                              'Address',
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -132,8 +132,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                       itemBuilder: (BuildContext context, int index) {
                         return Table(
                           columnWidths: const {
-                            0: FlexColumnWidth(3), // Company column wider
-                            1: FlexColumnWidth(2),
+                            0: FlexColumnWidth(2), // Company column wider
+                            1: FlexColumnWidth(3),
                             2: FlexColumnWidth(2),
                           },
                           defaultVerticalAlignment:
@@ -147,28 +147,42 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Text(userRecords[index].company),
+                                  child: Text(
+                                    userRecords[index].company,
+                                    style:
+                                        Theme.of(context).textTheme.bodySmall,
+                                  ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    userRecords[index].status,
-                                    style: TextStyle(
-                                      color:
-                                          userRecords[index].status == 'Cleared'
-                                              ? Colors.green
-                                              : Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                      // fontSize: 10,
-                                    ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "comp@mail.com",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                      Text(
+                                        "North Ridge",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                      ),
+                                    ],
                                   ),
                                 ),
                                 Center(
                                   child: Padding(
                                     padding: EdgeInsets.all(8),
-                                    child: IconButton(
-                                        onPressed: () {},
-                                        icon: const Icon(Icons.call)),
+                                    child: Text(
+                                      "0242232323",
+                                      style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall,
+                                    ),
                                   ),
                                 )
                               ],
@@ -404,22 +418,24 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                       ),
                     ),
                   )
-                else  
+                else
                   Padding(
                       padding: const EdgeInsets.only(top: 20.0),
-                      child: !_isValid ? Text(""): Text(
-                        'Applicant is Not Cleared!',
-                        style: TextStyle(
-                          color: !_isCleared ? Colors.red : Colors.green,
-                          fontSize: 16,
-                        ),
-                      )),
+                      child: !_isValid
+                          ? Text("")
+                          : Text(
+                              'Applicant is Not Cleared!',
+                              style: TextStyle(
+                                color: !_isCleared ? Colors.red : Colors.green,
+                                fontSize: 16,
+                              ),
+                            )),
                 if (_isCleared && _isFound && _isValid)
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        _showCompanyDetails(context);
+                        // _showCompanyDetails(context);
                       },
                       child: Text('Consider Application'),
                     ),
@@ -429,7 +445,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     padding: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        _showCompanyDetails(context);
+                        // _showCompanyDetails(context);
                       },
                       child: Text('Approve Application'),
                     ),
