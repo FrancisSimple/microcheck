@@ -185,6 +185,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                             ? Colors.green
                                             : Colors.red,
                                     fontWeight: FontWeight.bold,
+                                    fontSize: 10,
                                   ),
                                 ),
                               ),
