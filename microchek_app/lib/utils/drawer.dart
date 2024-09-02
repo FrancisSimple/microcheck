@@ -2,6 +2,7 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
 import 'package:flutter/material.dart';
+import 'package:microchek_app/microfinance.dart';
 
 // import 'package:flutter/material.dart';
 
@@ -50,17 +51,20 @@ class SampleDrawer extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: <Widget>[
                 ListTile(
+                  // titleAlignment: ListTileTitleAlignment.center,
                   leading: Icon(Icons.home),
-                  title: Text('Applicant Validation'),
+                  title: Center(child: Text('Applicant Validation')),
                   onTap: () {
                     Navigator.pop(context);
                   },
                 ),
                 ListTile(
                   leading: Icon(Icons.person),
-                  title: Text('My Microfinance'),
+                  title: Center(child: Text('My Microfinance')),
                   onTap: () {
                     Navigator.pop(context);
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => MyMicroPage()));
                   },
                 ),
                 // ListTile(
@@ -77,7 +81,7 @@ class SampleDrawer extends StatelessWidget {
           // Logout Button fixed at the bottom
           ListTile(
             leading: Icon(Icons.logout),
-            title: Text('Logout'),
+            title: Center(child: Text('Logout')),
             onTap: () {
               Navigator.pop(context);
               // Implement your logout functionality here
