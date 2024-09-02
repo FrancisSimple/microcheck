@@ -1,4 +1,4 @@
-package com.example.microchek_app
+package com.microcheck.app
 
 import io.flutter.embedding.android.FlutterActivity
 
