@@ -3,7 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/drawer.dart';
+import 'package:provider/provider.dart';
 
 class UserRecord {
   String company;
@@ -27,6 +29,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   bool _isValid = false;
   bool _isFound = false;
   bool _isCleared = false;
+  Client? thisClient;
+  List<Institution>? clientList = [];
 
   // Sample data
   List<UserRecord> userRecords = [
@@ -37,18 +41,37 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
     UserRecord('Company E', 'Cleared'),
   ];
 
-  void _validateGhanaCard() {
+  void _validateGhanaCard()async {
     if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
+      
         _isValid = true;
-        _isFound = _checkIfUserExists(_ghanaCardController.text);
-        if (_isFound) {
-          _isCleared =
-              userRecords.every((record) => record.status == 'Cleared');
-        } else {
+        _isFound = await checkClientExists(_ghanaCardController.text);
+        if (_isFound) {  
+          thisClient = await fetchClientData(_ghanaCardController.text);
+          clientList = thisClient!.allInstitutions;
+          
+          debugPrint('Client data Fetched');
+          if (thisClient != null){
+            for (Institution inst in clientList!){
+              if(inst.status != 'cleared'){
+                _isCleared = false;
+                break;
+              }
+
+          }
+          }
+          
+
+        } 
+        else {
           _isCleared = true;
         }
-      });
+      setState(() {
+      _isValid = _isValid;
+      _isFound = _isFound;
+      _isCleared = _isCleared;
+    });
+      
     } else {
       setState(() {
         _isValid = false;
@@ -58,9 +81,9 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
     }
   }
 
-  bool _checkIfUserExists(String cardNumber) {
-    return cardNumber == "GHA-123456789-0"; // Example Ghana Card number
-  }
+  // bool _checkIfUserExists(String cardNumber) {
+  //   return cardNumber == "GHA-123456789-0"; // Example Ghana Card number
+  // }
 
   void _showCompanyDetails(BuildContext context) {
     if (!_isCleared) {
@@ -128,7 +151,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   Expanded(
                     child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: userRecords.length,
+                      itemCount: clientList!.length,
                       itemBuilder: (BuildContext context, int index) {
                         return Table(
                           columnWidths: const {
@@ -148,7 +171,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
-                                    userRecords[index].company,
+                                    clientList![index].name,
                                     style:
                                         Theme.of(context).textTheme.bodySmall,
                                   ),
@@ -160,13 +183,13 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "comp@mail.com",
+                                        clientList![index].email,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
                                       ),
                                       Text(
-                                        "North Ridge",
+                                        clientList![index].location,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
@@ -178,7 +201,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                   child: Padding(
                                     padding: EdgeInsets.all(8),
                                     child: Text(
-                                      "0242232323",
+                                      clientList![index].contact,
                                       style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
@@ -352,6 +375,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
   @override
   Widget build(BuildContext context) {
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context,listen: true);
+    final currentInst = instProvider.currentInstitution;
     return Scaffold(
       appBar: AppBar(
         title: Text('Applicant Validation'),
@@ -392,15 +417,14 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                 SizedBox(height: 50),
                 ElevatedButton(
                   onPressed: _validateGhanaCard,
+                  
                   child: Text('Validate'),
                 ),
                 if (_isValid)
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
                     child: Text(
-                      _isFound
-                          ? 'Existing Records Found!'
-                          : 'No Existing Records!',
+                      _isFound ? 'Existing Records Found!': 'No Existing Records!',
                       style: TextStyle(
                         color: _isFound ? Colors.red : Colors.green,
                         fontSize: 16,
@@ -434,8 +458,10 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         // _showCompanyDetails(context);
+                        thisClient!.updateStatus('consideration', DateTime.now().toString());
+                        currentInst!.addClient(_ghanaCardController.text.trim(), thisClient!.status, instProvider);
                       },
                       child: Text('Consider Application'),
                     ),
@@ -446,6 +472,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         // _showCompanyDetails(context);
+                        thisClient!.updateStatus('cleared', DateTime.now().toString());
+                        currentInst!.addClient(_ghanaCardController.text.trim(), thisClient!.status, instProvider);
                       },
                       child: Text('Approve Application'),
                     ),

@@ -43,8 +43,20 @@ class Client{
     );
   }
 
-  Future<bool> addInstitution(uid) async{
-    return true;
+  Future<bool> addInstitution(String uid, InstitutionProvider instProvider,String status) async{
+    try{
+      Institution inst = await fetchInstitutionData(uid, instProvider);
+      inst.setStatus(status);
+      allInstitutions!.add(inst);
+      return await updateClientData(cardNumber);
+    }
+    catch(e){
+      debugPrint('Error adding institution to client: $e');
+    }
+    
+
+
+    return false;
   }
 }
 //End of client class
@@ -54,9 +66,9 @@ class Client{
 //the institution class
 class Institution{
 
-  String name, email,location,contact,uid;
+  String name, email,location,contact,uid,status;
   List<Client>? allClients;
-  Institution(this.name,this.email,this.uid,{this.location = 'Not set',this.contact = 'Not set',this.allClients});
+  Institution(this.name,this.email,this.uid,{this.location = 'Not set',this.contact = 'Not set',this.allClients,this.status = 'Not set'});
 
   void getName() => name;
 
@@ -65,6 +77,10 @@ class Institution{
   void getLocation() => location;
 
   void getContact() => contact;
+
+  void setStatus(String newStatus){
+    status = newStatus;
+  }
 
   Client getClient(String cardNumber){
     Client myClient = Client('None','None');
@@ -85,12 +101,13 @@ class Institution{
       'uid': uid,
       'location': location,
       'contact': contact,
+      'status': status,
       'allClients': allClients?.map((inst) => inst.toJson()).toList()
     };
   }
 
   static Institution fromJson(Map<String,dynamic> json){
-    return Institution(json['name'], json['email'], json['uid'],location: json['location'], contact:json['contact'],allClients: 
+    return Institution(json['name'], json['email'], json['uid'],location: json['location'],status: json['status'], contact:json['contact'],allClients: 
     json['allClients']!= null
           ? (json['allClients'] as List).map((instJson) => Client.fromJson(instJson)).toList()
           : null,
@@ -106,7 +123,8 @@ class Institution{
       currentClient.updateStatus(status, date.toString());
       allClients!.add(currentClient);
 
-      if(await currentClient.addInstitution(uid) == false){
+
+      if(await currentClient.addInstitution(uid,instProvider,status) == false){
         debugPrint('Failed to add a new institution to client');
         return false;
       }
@@ -134,7 +152,7 @@ class Institution{
             'allInstitutions': newClient.allInstitutions?.map((inst) => inst.toJson()).toList(),
       });
       newClient = await fetchClientData(number);
-      if(await newClient.addInstitution(uid) == false){
+      if(await newClient.addInstitution(uid,instProvider,status) == false){
         debugPrint('Failed to add a new institution to client');
         return false;
       }
