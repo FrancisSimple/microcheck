@@ -1,8 +1,12 @@
 // pages/login.dart
 // ignore_for_file: prefer_const_constructors
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:microchek_app/pages/dashboard.dart';
+import 'package:microchek_app/user_configure.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,15 +21,44 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
-  void _handleLogin() {
+  void _handleLogin() async {
     if (_formKey.currentState!.validate()) {
       // Perform login logic (e.g., authenticate user)
-      Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => GhanaCardValidationPage(),
-      ));
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Logging in...')),
-      );
+      try{
+         String email = _emailController.text.trim();
+          String password = _passwordController.text.trim();
+          User? user = await getUserCredentials(email,password);
+          if(user != null){
+            ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Logging in...')),
+            );
+            if(await checkInstitution(user.uid)){
+              debugPrint('institution exists');
+              InstitutionProvider institutionProvider = Provider.of<InstitutionProvider>(context,listen:false);
+              debugPrint('fetching user data');
+              await fetchInstitutionData(user.uid, institutionProvider);
+              debugPrint('done fetching');
+              Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => GhanaCardValidationPage(),));
+          }
+          else{
+            debugPrint('institution does not exist');
+          }
+      }
+  
+      }
+      catch(e){
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Sorry, Account not found.')),
+            );
+        debugPrint('Error logging in: $e');
+      }
+     
+      
+
+      //Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => GhanaCardValidationPage(),));
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Logging in...')),
+      // );
     }
   }
 
@@ -154,7 +187,8 @@ class _LoginPageState extends State<LoginPage> {
                             padding: const EdgeInsets.symmetric(vertical: 20.0),
                             child: ElevatedButton(
                               onPressed: (){
-                                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => GhanaCardValidationPage()));
+                                _handleLogin();
+                                //Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => GhanaCardValidationPage()));
                               },
                               style: ElevatedButton.styleFrom(
                                 // padding: EdgeInsets.symmetric(vertical: 15.0),
