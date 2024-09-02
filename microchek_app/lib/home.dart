@@ -49,10 +49,10 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   void _showCompanyDetails(BuildContext context) {
     // Sample data
     List<UserRecord> userRecords = [
-      UserRecord('Company A', 1000, 500, 'Not Cleared'),
+      UserRecord('Company A', 1000, 500, 'In Debt'),
       UserRecord('Company B', 200, 200, 'Cleared'),
-      UserRecord('Company C', 500, 0, 'Not Cleared'),
-      UserRecord('Company D', 800, 300, 'Not Cleared'),
+      UserRecord('Company C', 500, 0, 'In Debt'),
+      UserRecord('Company D', 800, 300, 'In Debt'),
       UserRecord('Company E', 100, 100, 'Cleared'),
     ];
 
@@ -62,18 +62,21 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         return AlertDialog(
           insetPadding: EdgeInsets.all(10),
           contentPadding: EdgeInsets.all(10),
-          title: Text('User Records'),
+          title: Text('Applicant Records'),
           content: SizedBox(
             width: MediaQuery.sizeOf(context).width,
+            height: MediaQuery.sizeOf(context).height,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Table(
                   columnWidths: const {
-                    0: FlexColumnWidth(2), // Company column wider
-                    1: FlexColumnWidth(1),
-                    2: FlexColumnWidth(1),
-                    3: FlexColumnWidth(1),
+                    0: FlexColumnWidth(3), // Company column wider
+                    1: FlexColumnWidth(2),
+                    2: FlexColumnWidth(2),
+                    3: FlexColumnWidth(2),
+                    4: FlexColumnWidth(2)
                   },
                   border: TableBorder(
                     horizontalInside:
@@ -82,9 +85,11 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   children: [
                     TableRow(
                       decoration: BoxDecoration(
-                        color: Colors
-                            .grey[200], // Light grey background for header
-                      ),
+                          color: Colors.amber[200],
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10),
+                          )),
                       children: [
                         Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -93,18 +98,22 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Owed',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Owed',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            'Paid',
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Paid',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
                         Padding(
@@ -112,6 +121,15 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                           child: Text(
                             'Status',
                             style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Contact',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
                       ],
@@ -126,14 +144,17 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     itemBuilder: (BuildContext context, int index) {
                       return Table(
                         columnWidths: const {
-                          0: FlexColumnWidth(2), // Company column wider
-                          1: FlexColumnWidth(1),
-                          2: FlexColumnWidth(1),
-                          3: FlexColumnWidth(1),
+                          0: FlexColumnWidth(3), // Company column wider
+                          1: FlexColumnWidth(2),
+                          2: FlexColumnWidth(2),
+                          3: FlexColumnWidth(2),
+                          4: FlexColumnWidth(2)
                         },
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.middle,
                         border: TableBorder(
                           horizontalInside:
-                              BorderSide(width: 1, color: Colors.grey[300]!),
+                              BorderSide(width: 1, color: Colors.amber[300]!),
                         ),
                         children: [
                           TableRow(
@@ -142,13 +163,17 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(userRecords[index].company),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('GHS ${userRecords[index].owed}'),
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text('${userRecords[index].owed}'),
+                                ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text('GHS ${userRecords[index].paid}'),
+                              Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text('${userRecords[index].paid}'),
+                                ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -163,6 +188,14 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                   ),
                                 ),
                               ),
+                              Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: IconButton(
+                                      onPressed: () {},
+                                      icon: const Icon(Icons.call)),
+                                ),
+                              )
                             ],
                           ),
                         ],
@@ -191,20 +224,24 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add User to System'),
+          title: Text(
+            'Add User to System',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           content: SingleChildScrollView(
             child: Form(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Name'),
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Email'),
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(labelText: 'Phone Number'),
-                  ),
+                  _buildTextFormField('Name', Icons.person),
+                  SizedBox(height: 10),
+                  _buildTextFormField('Email', Icons.email),
+                  SizedBox(height: 10),
+                  _buildTextFormField(
+                      'Ghana Card Number', Icons.payment_rounded,
+                      enabled: false),
+                  SizedBox(height: 10),
+                  _buildTextFormField('Phone Number', Icons.phone),
                   // Add more fields as necessary
                 ],
               ),
@@ -212,12 +249,15 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.redAccent),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            TextButton(
+            ElevatedButton(
               child: Text('Add User'),
               onPressed: () {
                 // Implement the logic to add the user to the system here
@@ -227,6 +267,22 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildTextFormField(String labelText, IconData icon, {bool? enabled}) {
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: labelText,
+        prefixIcon: Icon(icon),
+        enabled: enabled ?? true,
+        
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        filled: true,
+        // fillColor: Colors.grey[100],
+      ),
     );
   }
 
