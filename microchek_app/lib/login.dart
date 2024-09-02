@@ -161,12 +161,12 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                               child: Container(
-                                child: Text(
-                                  "Login",
-                                ),
                                 margin: EdgeInsets.symmetric(
                                   vertical: 5,
                                   horizontal: 25,
+                                ),
+                                child: Text(
+                                  "Login",
                                 ),
                               ),
                             ),

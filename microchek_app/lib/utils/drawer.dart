@@ -14,7 +14,7 @@ class SampleDrawer extends StatelessWidget {
       child: Column(
         children: [
           // Drawer Header with User Info
-          Container(
+          SizedBox(
             width: MediaQuery.sizeOf(context).width,
             // height: 250,
             child: DrawerHeader(
@@ -51,25 +51,25 @@ class SampleDrawer extends StatelessWidget {
               children: <Widget>[
                 ListTile(
                   leading: Icon(Icons.home),
-                  title: Text('Home'),
+                  title: Text('Applicant Validation'),
                   onTap: () {
                     Navigator.pop(context);
                   },
                 ),
                 ListTile(
                   leading: Icon(Icons.person),
-                  title: Text('Profile'),
+                  title: Text('My Microfinance'),
                   onTap: () {
                     Navigator.pop(context);
                   },
                 ),
-                ListTile(
-                  leading: Icon(Icons.settings),
-                  title: Text('Settings'),
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                ),
+                // ListTile(
+                //   leading: Icon(Icons.settings),
+                //   title: Text('Settings'),
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //   },
+                // ),
               ],
             ),
           ),
