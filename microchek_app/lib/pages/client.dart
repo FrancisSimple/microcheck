@@ -1,76 +1,53 @@
 // pages/client.dart
 // ignore_for_file: prefer_const_constructors
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:microchek_app/pages/dashboard.dart';
+import 'package:microchek_app/user_configure.dart';
 // import 'package:flutter/material.dart';
 import 'package:microchek_app/utils/drawer.dart';
+import 'package:provider/provider.dart';
 
-class ClientRecord {
-  String name;
-  String ghanaCardNumber;
-  String lastUpdated;
-  String status;
 
-  ClientRecord({
-    required this.name,
-    required this.ghanaCardNumber,
-    required this.lastUpdated,
-    required this.status,
-  });
-}
 
 class ClientPage extends StatefulWidget {
-  const ClientPage({super.key});
-
+  const ClientPage({super.key,required this.uid,required this.allClients});
+  final String uid;
+  final List<Client> allClients;
   @override
   State<ClientPage> createState() => _ClientPageState();
 }
 
 class _ClientPageState extends State<ClientPage> {
-  List<ClientRecord> clientRecords = [
-    ClientRecord(
-        name: 'John Doe',
-        ghanaCardNumber: 'GHA-123456789-0',
-        lastUpdated: "12/05/2000",
-        status: "Cleared"),
-    ClientRecord(
-      name: 'Jane Smith',
-      ghanaCardNumber: 'GHA-987654321-0',
-      lastUpdated: "06/08/1970",
-      status: "Considering",
-    ),
-    ClientRecord(
-      name: 'Jane Smith',
-      ghanaCardNumber: 'GHA-987654321-0',
-      lastUpdated: "06/08/1970",
-      status: "Active ",
-    ),
-    // Add more sample clients here
-  ];
+  
 
-  List<ClientRecord> filteredRecords = [];
+  List<Client> filteredRecords = [];
+  
 
   @override
-  void initState() {
+  void initState()  {
     super.initState();
-    filteredRecords = clientRecords;
+    
+    filteredRecords = widget.allClients;
+    
   }
 
   void _filterClients(String query) {
     final lowerQuery = query.toLowerCase();
     setState(() {
-      filteredRecords = clientRecords.where((client) {
+      filteredRecords = widget.allClients.where((client) {
         return client.name.toLowerCase().contains(lowerQuery) ||
-            client.ghanaCardNumber.toLowerCase().contains(lowerQuery);
+            client.cardNumber.toLowerCase().contains(lowerQuery);
       }).toList();
     });
   }
 
-  void _showEditClientDialog(ClientRecord client) {
+  void _showEditClientDialog(Client client) {
     final TextEditingController nameController =
         TextEditingController(text: client.name);
     final TextEditingController ghanaCardController =
-        TextEditingController(text: client.ghanaCardNumber);
+        TextEditingController(text: client.cardNumber);
     String? selectedStatus; // Variable to store the selected dropdown value
 
     showDialog(
@@ -154,12 +131,13 @@ class _ClientPageState extends State<ClientPage> {
             ),
             ElevatedButton(
               child: Text('Update'),
-              onPressed: () {
+              onPressed: () async{
                 setState(() {
                   client.name = nameController.text.trim();
-                  client.ghanaCardNumber = ghanaCardController.text.trim();
-                  client.lastUpdated = DateTime.now().toString();
+                  client.cardNumber = ghanaCardController.text.trim();
+                  
                 });
+                await addInstToClient(client.cardNumber, widget.uid, selectedStatus!);
                 Navigator.of(context).pop();
               },
             ),
@@ -171,6 +149,12 @@ class _ClientPageState extends State<ClientPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
+    final currentInst = instProvider.currentInstitution;
+
+    
+    //filteredRecords = await fetchInstitutionDataAsList(currentInst!.uid);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Clients'),
@@ -203,7 +187,7 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-  Widget buildClientTable(BuildContext context, List<ClientRecord> records) {
+  Widget buildClientTable(BuildContext context, List<Client> records) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
@@ -221,9 +205,9 @@ class _ClientPageState extends State<ClientPage> {
             (index) => DataRow(
               cells: [
                 DataCell(Text(records[index].name)),
-                DataCell(Text(records[index].ghanaCardNumber)),
+                DataCell(Text(records[index].cardNumber)),
                 DataCell(Center(child: Text(records[index].status))),
-                DataCell(Text(records[index].lastUpdated)),
+                DataCell(Text('Not needed again')),
                 DataCell(
                   ElevatedButton(
                     onPressed: () {

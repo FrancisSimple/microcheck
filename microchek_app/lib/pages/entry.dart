@@ -3,7 +3,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/drawer.dart';
+import 'package:provider/provider.dart';
 
 class MyMicroPage extends StatefulWidget {
   const MyMicroPage({super.key});
@@ -15,6 +17,8 @@ class MyMicroPage extends StatefulWidget {
 class _MyMicroPageState extends State<MyMicroPage> {
   @override
   Widget build(BuildContext context) {
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
+    final currentInst = instProvider.currentInstitution;
     return Scaffold(
       appBar: AppBar(
         title: Text('My Microfinance'),
@@ -47,15 +51,15 @@ class _MyMicroPageState extends State<MyMicroPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     buildInfoRow(Icons.business, 'Institution Name',
-                        'Microfinance Inc.'),
+                        currentInst!.name),
                     buildDivider(),
                     buildInfoRow(Icons.location_on, 'Location',
-                        '123 Finance Avenue, Accra, Ghana'),
+                        currentInst.location),
                     buildDivider(),
-                    buildInfoRow(Icons.phone, 'Contact', '+233 24 123 4567'),
+                    buildInfoRow(Icons.phone, 'Contact', currentInst.contact),
                     buildDivider(),
                     buildInfoRow(
-                        Icons.email, 'Email', 'info@microfinanceinc.com'),
+                        Icons.email, 'Email', currentInst.email),
                     buildDivider(),
                     buildInfoRow(Icons.calendar_today, 'Registered Since',
                         'January 1, 2020'),

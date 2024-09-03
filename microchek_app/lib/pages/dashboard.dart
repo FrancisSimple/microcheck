@@ -1,6 +1,7 @@
 // pages/dashboard.dart
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:microchek_app/user_configure.dart';
@@ -46,19 +47,19 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
       _isValid = true;
       _isFound = await checkClientExists(_ghanaCardController.text);
       if (_isFound) {
-        thisClient = await fetchClientData(_ghanaCardController.text);
-        clientList = thisClient!.allInstitutions;
 
-        debugPrint('Client data Fetched');
-        if (thisClient != null) {
-          for (Institution inst in clientList!) {
-            if (inst.status != 'cleared') {
-              _isCleared = false;
-              break;
-            }
-          }
+        thisClient = await fetchClientData(_ghanaCardController.text);
+        //clientList = thisClient!.allInstitutions;
+
+        debugPrint('Client data Fetched: ${thisClient!.loanNumber}');
+        if (thisClient != null && thisClient!.loanNumber == 0) {
+          _isCleared = true;
         }
-      } else {
+        else{
+          _isCleared = false;
+        }
+      }
+      else {
         _isCleared = true;
       }
       setState(() {
@@ -79,8 +80,9 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   //   return cardNumber == "GHA-123456789-0"; // Example Ghana Card number
   // }
 
-  void _showCompanyDetails(BuildContext context) {
-    if (!_isCleared) {
+  void _showCompanyDetails(BuildContext context,List<Institution> allInsts) {
+    
+
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -145,7 +147,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   Expanded(
                     child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount: clientList!.length,
+                      itemCount: allInsts.length,
                       itemBuilder: (BuildContext context, int index) {
                         return Table(
                           columnWidths: const {
@@ -165,7 +167,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Text(
-                                    clientList![index].name,
+                                    allInsts[index].name,
                                     style:
                                         Theme.of(context).textTheme.bodySmall,
                                   ),
@@ -178,13 +180,13 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        clientList![index].email,
+                                        allInsts[index].email,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
                                       ),
                                       Text(
-                                        clientList![index].location,
+                                        allInsts[index].location,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall,
@@ -196,7 +198,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                   child: Padding(
                                     padding: EdgeInsets.all(8),
                                     child: Text(
-                                      clientList![index].contact,
+                                      allInsts[index].contact,
                                       style:
                                           Theme.of(context).textTheme.bodySmall,
                                     ),
@@ -223,7 +225,6 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
           );
         },
       );
-    } else {}
   }
 
   void _showAddUserForm(BuildContext context, String ghanaCardNumber,
@@ -355,9 +356,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
                   // Implement the logic to add the user to the system here
-                  await institution.addClient(
-                      _ghanaCardController.text.trim(), 'cleared', instProvider,
-                      name: nameController.text.trim());
+                  await addInstToClient(_ghanaCardController.text.trim(), institution.uid, selectedStatus!,name: nameController.text.trim(),contact: phoneController.text.trim());
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Client added Successfully')),
                   );
@@ -419,9 +418,9 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider =
-        Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
+    //fetchInstitutionData(currentInst!.uid, instProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text('Applicant Validation'),
@@ -506,10 +505,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     child: ElevatedButton(
                       onPressed: () async {
                         // _showCompanyDetails(context);
-                        thisClient!.updateStatus(
-                            'consideration', DateTime.now().toString());
-                        currentInst!.addClient(_ghanaCardController.text.trim(),
-                            thisClient!.status, instProvider);
+                        
+                        addInstToClient(_ghanaCardController.text.trim(), currentInst!.uid, 'consideration');
                       },
                       child: Text('Consider Application'),
                     ),
@@ -520,10 +517,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     child: ElevatedButton(
                       onPressed: () {
                         // _showCompanyDetails(context);
-                        thisClient!
-                            .updateStatus('cleared', DateTime.now().toString());
-                        currentInst!.addClient(_ghanaCardController.text.trim(),
-                            thisClient!.status, instProvider);
+                        addInstToClient(_ghanaCardController.text.trim(), currentInst!.uid, 'owing');
                       },
                       child: Text('Approve Application'),
                     ),
@@ -532,8 +526,10 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
                     child: ElevatedButton(
-                      onPressed: () {
-                        _showCompanyDetails(context);
+                      onPressed: () async {
+                        List<Institution> instList = await fetchInstitutionDataAsList(_ghanaCardController.text.trim());
+                        
+                        _showCompanyDetails(context,instList);
                       },
                       child: Text('View Company Details'),
                     ),
@@ -621,3 +617,78 @@ class GhanaCardNumberFormatter extends TextInputFormatter {
     );
   }
 }
+
+
+
+// Function to fetch data and create a list of string maps
+
+// Function to fetch data and create a list of maps
+Future<List<Institution>> fetchInstitutionDataAsList(String clientId) async {
+  try {
+    // Get a reference to the Firestore collection
+    CollectionReference collection = FirebaseFirestore.instance.collection('clients').doc(clientId).collection('myinstitutions');
+    
+    // Fetch all documents from the collection
+    QuerySnapshot querySnapshot = await collection.get();
+    
+    // Initialize a list to hold the maps
+    List<Institution> dataList = [];
+    
+    // Iterate through each document in the collection
+    for (QueryDocumentSnapshot document in querySnapshot.docs) {
+      // Get the data as a map
+      
+      Institution dataMap = await rawInstitutionData(document.id);
+      
+      // Add the map to the list
+      dataList.add(dataMap);
+    }
+    
+    
+    return dataList;
+  } catch (e) {
+    // Handle errors
+    print('Error fetching documents: $e');
+    return [];
+  }
+}
+
+
+Future<List<Client>> fetchClientDataAsList(String instId) async {
+  try {
+    // Get a reference to the Firestore collection
+    CollectionReference collection = FirebaseFirestore.instance.collection('institutions').doc(instId).collection('myclients');
+    
+    // Fetch all documents from the collection
+    QuerySnapshot querySnapshot = await collection.get();
+    
+    // Initialize a list to hold the maps
+    List<Client> dataList = [];
+    
+    // Iterate through each document in the collection
+    for (QueryDocumentSnapshot document in querySnapshot.docs) {
+
+      // Get the data as a map
+      if (document.id != 'default'){
+
+        Client dataMap = await fetchClientData(document.id);
+        
+        // Add the map to the list
+        dataList.add(dataMap);
+        
+      }
+
+    }
+    
+    
+    return dataList;
+  } catch (e,stacktrace) {
+    // Handle errors
+    print('Error fetching documents: $e');
+    debugPrint('stack: $stacktrace');
+    return [];
+  }
+}
+
+
+

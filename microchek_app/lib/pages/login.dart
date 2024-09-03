@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:microchek_app/pages/dashboard.dart';
+import 'package:microchek_app/pages/start_details.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
@@ -44,21 +45,30 @@ class _LoginPageState extends State<LoginPage> {
             if (mounted) {
               Navigator.pop(context);
             }
+
             Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) => GhanaCardValidationPage(),
             ));
           } else {
-            debugPrint('institution does not exist');
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => OnboardingPage(uid: user.uid,email:user.email!),));
           }
         }
+        //user does not exist we lead to onboarding page:
+        else{
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sorry, Account not found.')),
+        );
+        }
       } catch (e) {
+        //Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Sorry, Account not found.')),
         );
-        if (mounted) {
-          Navigator.pop(context);
-        }
-        debugPrint('Error logging in: $e');
+        // if (mounted) {
+        //   Navigator.pop(context);
+        // }
+        // debugPrint('Error logging in: $e');
       }
 
       //Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => GhanaCardValidationPage(),));
