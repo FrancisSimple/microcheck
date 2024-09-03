@@ -7,12 +7,11 @@ import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/user_configure.dart';
 // import 'package:flutter/material.dart';
 import 'package:microchek_app/utils/drawer.dart';
+import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
 
-
-
 class ClientPage extends StatefulWidget {
-  const ClientPage({super.key,required this.uid,required this.allClients});
+  const ClientPage({super.key, required this.uid, required this.allClients});
   final String uid;
   final List<Client> allClients;
   @override
@@ -20,17 +19,13 @@ class ClientPage extends StatefulWidget {
 }
 
 class _ClientPageState extends State<ClientPage> {
-  
-
   List<Client> filteredRecords = [];
-  
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
-    
+
     filteredRecords = widget.allClients;
-    
   }
 
   void _filterClients(String query) {
@@ -93,10 +88,13 @@ class _ClientPageState extends State<ClientPage> {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    items: ['Consider Application', 'Approve Application', 'Cleared']
-                        .map((String status) {
+                    items: [
+                      'Consider Application',
+                      'Approve Application',
+                      'Cleared'
+                    ].map((String status) {
                       return DropdownMenuItem<String>(
-                        value: status.split("").first,
+                        value: status,
                         child: Text(
                           status,
                           style: Theme.of(context).textTheme.bodySmall,
@@ -131,13 +129,15 @@ class _ClientPageState extends State<ClientPage> {
             ),
             ElevatedButton(
               child: Text('Update'),
-              onPressed: () async{
+              onPressed: () async {
+                loadingDialog(context);
                 setState(() {
                   client.name = nameController.text.trim();
                   client.cardNumber = ghanaCardController.text.trim();
-                  
                 });
-                await addInstToClient(client.cardNumber, widget.uid, selectedStatus!);
+                await addInstToClient(
+                    client.cardNumber, widget.uid, selectedStatus!);
+                Navigator.of(context).pop();
                 Navigator.of(context).pop();
               },
             ),
@@ -149,11 +149,10 @@ class _ClientPageState extends State<ClientPage> {
 
   @override
   Widget build(BuildContext context) {
-
-    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider =
+        Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
 
-    
     //filteredRecords = await fetchInstitutionDataAsList(currentInst!.uid);
     return Scaffold(
       appBar: AppBar(
@@ -162,7 +161,11 @@ class _ClientPageState extends State<ClientPage> {
       ),
       drawer: SampleDrawer(),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          // bottom: 16,
+        ),
         child: Column(
           children: [
             TextField(
@@ -197,7 +200,7 @@ class _ClientPageState extends State<ClientPage> {
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Ghana Card Number')),
             DataColumn(label: Center(child: Text('Status'))),
-            DataColumn(label: Text('Last Updated')),
+            // DataColumn(label: Text('Last Updated')),
             DataColumn(label: Text('')),
           ],
           rows: List<DataRow>.generate(
@@ -207,13 +210,18 @@ class _ClientPageState extends State<ClientPage> {
                 DataCell(Text(records[index].name)),
                 DataCell(Text(records[index].cardNumber)),
                 DataCell(Center(child: Text(records[index].status))),
-                DataCell(Text('Not needed again')),
+                // DataCell(Text('Not needed again')),
                 DataCell(
                   ElevatedButton(
                     onPressed: () {
-                      _showEditClientDialog(records[index]);
+                      loadingDialog(context);
+                      // _showEditClientDialog(records[index]);
+                      Navigator.of(context).pop();
                     },
-                    child: Text('Update'),
+                    child: Text(
+                      'Clear',
+                      style: TextStyle(color: Colors.redAccent),
+                    ),
                   ),
                 ),
               ],

@@ -50,15 +50,18 @@ class _LoginPageState extends State<LoginPage> {
               builder: (context) => GhanaCardValidationPage(),
             ));
           } else {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => OnboardingPage(uid: user.uid,email:user.email!),));
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) =>
+                  OnboardingPage(uid: user.uid, email: user.email!),
+            ));
           }
         }
         //user does not exist we lead to onboarding page:
-        else{
+        else {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sorry, Account not found.')),
-        );
+            SnackBar(content: Text('Sorry, Account not found.')),
+          );
         }
       } catch (e) {
         //Navigator.pop(context);
@@ -86,9 +89,10 @@ class _LoginPageState extends State<LoginPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 40.0,
-              horizontal: 10,
+            padding: const EdgeInsets.only(
+              left: 16.0,
+              right: 16.0,
+              bottom: 16,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

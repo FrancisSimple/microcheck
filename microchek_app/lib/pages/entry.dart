@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/drawer.dart';
+import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
 
 class MyMicroPage extends StatefulWidget {
@@ -17,7 +18,8 @@ class MyMicroPage extends StatefulWidget {
 class _MyMicroPageState extends State<MyMicroPage> {
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider =
+        Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
     return Scaffold(
       appBar: AppBar(
@@ -26,7 +28,11 @@ class _MyMicroPageState extends State<MyMicroPage> {
       ),
       drawer: SampleDrawer(),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          // bottom: 16,
+        ),
         child: ListView(
           children: <Widget>[
             SizedBox(height: 20),
@@ -50,16 +56,15 @@ class _MyMicroPageState extends State<MyMicroPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    buildInfoRow(Icons.business, 'Institution Name',
-                        currentInst!.name),
+                    buildInfoRow(
+                        Icons.business, 'Institution Name', currentInst!.name),
                     buildDivider(),
-                    buildInfoRow(Icons.location_on, 'Location',
-                        currentInst.location),
+                    buildInfoRow(
+                        Icons.location_on, 'Location', currentInst.location),
                     buildDivider(),
                     buildInfoRow(Icons.phone, 'Contact', currentInst.contact),
                     buildDivider(),
-                    buildInfoRow(
-                        Icons.email, 'Email', currentInst.email),
+                    buildInfoRow(Icons.email, 'Email', currentInst.email),
                     buildDivider(),
                     buildInfoRow(Icons.calendar_today, 'Registered Since',
                         'January 1, 2020'),
@@ -67,6 +72,7 @@ class _MyMicroPageState extends State<MyMicroPage> {
                     Center(
                       child: ElevatedButton.icon(
                         onPressed: () {
+                          // loadingDialog(context);
                           // Implement edit profile functionality here
                           showDialog(
                             context: context,
@@ -74,6 +80,7 @@ class _MyMicroPageState extends State<MyMicroPage> {
                               return EditProfilePopup();
                             },
                           );
+                          // Navigator.of(context).pop();
                         },
                         icon: Icon(
                           Icons.edit,
@@ -251,6 +258,9 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
           onPressed: () {
             if (_formKey.currentState!.validate()) {
               // Save the profile changes
+              loadingDialog(context);
+              // Implement save profile functionality here
+              Navigator.of(context).pop();
               Navigator.of(context).pop();
             }
           },

@@ -4,14 +4,12 @@
 import 'package:flutter/material.dart';
 import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/user_configure.dart';
+import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
 // import 'package:flutter/material.dart';
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({super.key,
-                        required this.uid,
-                        required this.email
-  });
+  const OnboardingPage({super.key, required this.uid, required this.email});
   final String uid;
   final String email;
 
@@ -24,24 +22,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
-  
 
   void _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
+      loadingDialog(context);
       // Save the data to the database or shared preferences
       String institutionName = _nameController.text.trim();
       String location = _locationController.text.trim();
       String contact = _contactController.text.trim();
-      await createNewInstitution(widget.uid, institutionName, widget.email, contact, location);
-      InstitutionProvider inst = Provider.of<InstitutionProvider>(context, listen: false);
+      await createNewInstitution(
+          widget.uid, institutionName, widget.email, contact, location);
+      InstitutionProvider inst =
+          Provider.of<InstitutionProvider>(context, listen: false);
       await fetchInstitutionData(widget.uid, inst);
       // Logic to save the institution details
       // You can replace this with your logic to save data in the backend or locally
-
+      Navigator.of(context).pop();
       // Navigate to the next page after saving the data
       Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (context) => GhanaCardValidationPage(),
-            ));
+        builder: (context) => GhanaCardValidationPage(),
+      ));
     }
   }
 
@@ -83,10 +83,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
             // topRight: Radius.circular(50),
           ),
         ),
-        padding: EdgeInsets.only(
-          top: 50,
-          left: 20,
-          right: 20,
+        padding: const EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          // bottom: 16,
         ),
         child: ListView(
           children: [

@@ -7,6 +7,7 @@ import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/pages/entry.dart';
 import 'package:microchek_app/pages/start_details.dart';
 import 'package:microchek_app/user_configure.dart';
+import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
 
 // import 'package:flutter/material.dart';
@@ -16,7 +17,8 @@ class SampleDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-        InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider =
+        Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
     return Drawer(
       child: Column(
@@ -68,8 +70,9 @@ class SampleDrawer extends StatelessWidget {
                   )),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => GhanaCardValidationPage()));
+
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => GhanaCardValidationPage()));
                   },
                 ),
                 ListTile(
@@ -81,10 +84,16 @@ class SampleDrawer extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   )),
                   onTap: () async {
-                    List<Client> allClients = await fetchClientDataAsList(currentInst!.uid);
+                    loadingDialog(context);
+                    List<Client> allClients =
+                        await fetchClientDataAsList(currentInst!.uid);
                     Navigator.pop(context);
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => ClientPage(uid: currentInst.uid, allClients: allClients,)));
+                    Navigator.pop(context);
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ClientPage(
+                              uid: currentInst.uid,
+                              allClients: allClients,
+                            )));
                   },
                 ),
                 ListTile(
@@ -120,6 +129,8 @@ class SampleDrawer extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             )),
             onTap: () {
+              Navigator.pop(context);
+              loadingDialog(context);
               Navigator.pop(context);
               // Implement your logout functionality here
             },

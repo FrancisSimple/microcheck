@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/drawer.dart';
+import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
 
 class UserRecord {
@@ -44,22 +45,20 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
   void _validateGhanaCard() async {
     if (_formKey.currentState?.validate() ?? false) {
+      loadingDialog(context);
       _isValid = true;
       _isFound = await checkClientExists(_ghanaCardController.text);
       if (_isFound) {
-
         thisClient = await fetchClientData(_ghanaCardController.text);
         //clientList = thisClient!.allInstitutions;
 
         debugPrint('Client data Fetched: ${thisClient!.loanNumber}');
         if (thisClient != null && thisClient!.loanNumber == 0) {
           _isCleared = true;
-        }
-        else{
+        } else {
           _isCleared = false;
         }
-      }
-      else {
+      } else {
         _isCleared = true;
       }
       setState(() {
@@ -74,161 +73,159 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         _isCleared = false;
       });
     }
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   // bool _checkIfUserExists(String cardNumber) {
   //   return cardNumber == "GHA-123456789-0"; // Example Ghana Card number
   // }
 
-  void _showCompanyDetails(BuildContext context,List<Institution> allInsts) {
-    
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            insetPadding: EdgeInsets.all(10),
-            contentPadding: EdgeInsets.all(10),
-            title: Text('Applicant Records'),
-            content: SizedBox(
-              width: MediaQuery.sizeOf(context).width,
-              height: MediaQuery.sizeOf(context).height,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Table(
-                    columnWidths: const {
-                      0: FlexColumnWidth(2), // Company column wider
-                      1: FlexColumnWidth(3),
-                      2: FlexColumnWidth(2),
-                    },
-                    border: TableBorder(
-                      horizontalInside:
-                          BorderSide(width: 1, color: Colors.grey[300]!),
-                    ),
-                    children: [
-                      TableRow(
-                        decoration: BoxDecoration(
-                            color: Colors.amber[200],
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(10),
-                              topRight: Radius.circular(10),
-                            )),
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Company',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Address',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(
-                                'Contact',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+  void _showCompanyDetails(BuildContext context, List<Institution> allInsts) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          insetPadding: EdgeInsets.all(10),
+          contentPadding: EdgeInsets.all(10),
+          title: Text('Applicant Records'),
+          content: SizedBox(
+            width: MediaQuery.sizeOf(context).width,
+            height: MediaQuery.sizeOf(context).height,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Table(
+                  columnWidths: const {
+                    0: FlexColumnWidth(2), // Company column wider
+                    1: FlexColumnWidth(3),
+                    2: FlexColumnWidth(2),
+                  },
+                  border: TableBorder(
+                    horizontalInside:
+                        BorderSide(width: 1, color: Colors.grey[300]!),
                   ),
-                  SizedBox(height: 10),
-                  Expanded(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: allInsts.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        return Table(
-                          columnWidths: const {
-                            0: FlexColumnWidth(2), // Company column wider
-                            1: FlexColumnWidth(3),
-                            2: FlexColumnWidth(2),
-                          },
-                          defaultVerticalAlignment:
-                              TableCellVerticalAlignment.middle,
-                          border: TableBorder(
-                            horizontalInside:
-                                BorderSide(width: 1, color: Colors.amber[300]!),
+                  children: [
+                    TableRow(
+                      decoration: BoxDecoration(
+                          color: Colors.amber[200],
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            topRight: Radius.circular(10),
+                          )),
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Company',
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          children: [
-                            TableRow(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            'Address',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Contact',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: allInsts.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Table(
+                        columnWidths: const {
+                          0: FlexColumnWidth(2), // Company column wider
+                          1: FlexColumnWidth(3),
+                          2: FlexColumnWidth(2),
+                        },
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.middle,
+                        border: TableBorder(
+                          horizontalInside:
+                              BorderSide(width: 1, color: Colors.amber[300]!),
+                        ),
+                        children: [
+                          TableRow(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  allInsts[index].name,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      allInsts[index].email,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                    Text(
+                                      allInsts[index].location,
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8),
                                   child: Text(
-                                    allInsts[index].name,
+                                    allInsts[index].contact,
                                     style:
                                         Theme.of(context).textTheme.bodySmall,
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        allInsts[index].email,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                      ),
-                                      Text(
-                                        allInsts[index].location,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8),
-                                    child: Text(
-                                      allInsts[index].contact,
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ],
-                        );
-                      },
-                    ),
+                              )
+                            ],
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('Cancel'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showAddUserForm(BuildContext context, String ghanaCardNumber,
       Institution institution, InstitutionProvider instProvider) {
+    // loadingDialog(context);
     final formKey = GlobalKey<FormState>();
     final TextEditingController nameController = TextEditingController();
     // final TextEditingController emailController = TextEditingController();
@@ -298,6 +295,14 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     controller: ghanaCardController,
                     enabled:
                         false, // Keep this field disabled as it's auto-filled
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a Ghana Card Number';
+                      } else if (!_isValidGhanaCardNumber(value)) {
+                        return 'Invalid Ghana Card Number';
+                      }
+                      return null;
+                    },
                   ),
                   SizedBox(height: 20),
                   DropdownButtonFormField<String>(
@@ -356,7 +361,12 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
                   // Implement the logic to add the user to the system here
-                  await addInstToClient(_ghanaCardController.text.trim(), institution.uid, selectedStatus!,name: nameController.text.trim(),contact: phoneController.text.trim());
+                  loadingDialog(context);
+                  await addInstToClient(_ghanaCardController.text.trim(),
+                      institution.uid, selectedStatus!,
+                      name: nameController.text.trim(),
+                      contact: phoneController.text.trim());
+                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Client added Successfully')),
                   );
@@ -418,7 +428,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider =
+        Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
     //fetchInstitutionData(currentInst!.uid, instProvider);
     return Scaffold(
@@ -428,124 +439,143 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
       ),
       drawer: SampleDrawer(),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          bottom: 16,
+        ),
         child: Center(
           child: Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUnfocus,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                TextFormField(
-                  controller: _ghanaCardController,
-                  keyboardType: TextInputType.text,
-                  maxLength: 15,
-                  inputFormatters: [
-                    GhanaCardNumberFormatter(),
-                  ],
-                  decoration: InputDecoration(
-                    labelText: 'Ghana Card Number',
-                    hintText: 'GHA-000000000-0',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the Ghana Card Number';
-                    } else if (!_isValidGhanaCardNumber(value)) {
-                      return 'Invalid Ghana Card Number';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: _validateGhanaCard,
-                  child: Text('Validate'),
-                ),
-                if (_isValid)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Text(
-                      _isFound
-                          ? 'Existing Records Found!'
-                          : 'No Existing Records!',
-                      style: TextStyle(
-                        color: _isFound ? Colors.red : Colors.green,
-                        fontSize: 16,
-                      ),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    controller: _ghanaCardController,
+                    keyboardType: TextInputType.text,
+                    maxLength: 15,
+                    inputFormatters: [
+                      GhanaCardNumberFormatter(),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: 'Ghana Card Number',
+                      hintText: 'GHA-000000000-0',
+                      border: OutlineInputBorder(),
                     ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter the Ghana Card Number';
+                      } else if (!_isValidGhanaCardNumber(value)) {
+                        return 'Invalid Ghana Card Number';
+                      }
+                      return null;
+                    },
                   ),
-                if (_isCleared && _isValid)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Text(
-                      'Applicant is Cleared!',
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontSize: 16,
-                      ),
-                    ),
-                  )
-                else
-                  Padding(
+                  SizedBox(height: 50),
+                  ElevatedButton(
+                    onPressed: _validateGhanaCard,
+                    child: Text('Validate'),
+                  ),
+                  if (_isValid)
+                    Padding(
                       padding: const EdgeInsets.only(top: 20.0),
-                      child: !_isValid
-                          ? Text("")
-                          : Text(
-                              'Applicant is Not Cleared!',
-                              style: TextStyle(
-                                color: !_isCleared ? Colors.red : Colors.green,
-                                fontSize: 16,
-                              ),
-                            )),
-                if (_isCleared && _isFound && _isValid)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        // _showCompanyDetails(context);
-                        
-                        addInstToClient(_ghanaCardController.text.trim(), currentInst!.uid, 'consideration');
-                      },
-                      child: Text('Consider Application'),
+                      child: Text(
+                        _isFound
+                            ? 'Existing Records Found!'
+                            : 'No Existing Records!',
+                        style: TextStyle(
+                          color: _isFound ? Colors.red : Colors.green,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
-                  ),
-                if (_isCleared && _isFound && _isValid)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // _showCompanyDetails(context);
-                        addInstToClient(_ghanaCardController.text.trim(), currentInst!.uid, 'owing');
-                      },
-                      child: Text('Approve Application'),
+                  if (_isCleared && _isValid)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Text(
+                        'Applicant is Cleared!',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 16,
+                        ),
+                      ),
+                    )
+                  else
+                    Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: !_isValid
+                            ? Text("")
+                            : Text(
+                                'Applicant is Not Cleared!',
+                                style: TextStyle(
+                                  color:
+                                      !_isCleared ? Colors.red : Colors.green,
+                                  fontSize: 16,
+                                ),
+                              )),
+                  if (_isCleared && _isFound && _isValid)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          // _showCompanyDetails(context);
+                          loadingDialog(context);
+
+                          addInstToClient(_ghanaCardController.text.trim(),
+                              currentInst!.uid, 'consideration');
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Consider Application'),
+                      ),
                     ),
-                  ),
-                if (_isFound && _isValid && !_isCleared)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        List<Institution> instList = await fetchInstitutionDataAsList(_ghanaCardController.text.trim());
-                        
-                        _showCompanyDetails(context,instList);
-                      },
-                      child: Text('View Company Details'),
+                  if (_isCleared && _isFound && _isValid)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          loadingDialog(context);
+                          // _showCompanyDetails(context);
+                          addInstToClient(_ghanaCardController.text.trim(),
+                              currentInst!.uid, 'owing');
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Approve Application'),
+                      ),
                     ),
-                  ),
-                if (!_isFound && _isValid)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        _showAddUserForm(context, _ghanaCardController.text,
-                            currentInst!, instProvider);
-                      },
-                      child: Text('Add Applicant'),
+                  if (_isFound && _isValid && !_isCleared)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          loadingDialog(context);
+                          List<Institution> instList =
+                              await fetchInstitutionDataAsList(
+                                  _ghanaCardController.text.trim());
+                          _showCompanyDetails(context, instList);
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('View Company Details'),
+                      ),
                     ),
-                  ),
-              ],
+                  if (!_isFound && _isValid)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // loadingDialog(context);
+                          _showAddUserForm(context, _ghanaCardController.text,
+                              currentInst!, instProvider);
+                          // Navigator.of(context).pop();
+                        },
+                        child: Text('Add Applicant'),
+                      ),
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -556,6 +586,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
           _showAddUserForm(
               context, _ghanaCardController.text, currentInst!, instProvider);
+          // Navigator.of(context).pop();
         },
         tooltip: 'Add Applicant',
         child: Icon(
@@ -618,33 +649,33 @@ class GhanaCardNumberFormatter extends TextInputFormatter {
   }
 }
 
-
-
 // Function to fetch data and create a list of string maps
 
 // Function to fetch data and create a list of maps
 Future<List<Institution>> fetchInstitutionDataAsList(String clientId) async {
   try {
     // Get a reference to the Firestore collection
-    CollectionReference collection = FirebaseFirestore.instance.collection('clients').doc(clientId).collection('myinstitutions');
-    
+    CollectionReference collection = FirebaseFirestore.instance
+        .collection('clients')
+        .doc(clientId)
+        .collection('myinstitutions');
+
     // Fetch all documents from the collection
     QuerySnapshot querySnapshot = await collection.get();
-    
+
     // Initialize a list to hold the maps
     List<Institution> dataList = [];
-    
+
     // Iterate through each document in the collection
     for (QueryDocumentSnapshot document in querySnapshot.docs) {
       // Get the data as a map
-      
+
       Institution dataMap = await rawInstitutionData(document.id);
-      
+
       // Add the map to the list
       dataList.add(dataMap);
     }
-    
-    
+
     return dataList;
   } catch (e) {
     // Handle errors
@@ -653,42 +684,36 @@ Future<List<Institution>> fetchInstitutionDataAsList(String clientId) async {
   }
 }
 
-
 Future<List<Client>> fetchClientDataAsList(String instId) async {
   try {
     // Get a reference to the Firestore collection
-    CollectionReference collection = FirebaseFirestore.instance.collection('institutions').doc(instId).collection('myclients');
-    
+    CollectionReference collection = FirebaseFirestore.instance
+        .collection('institutions')
+        .doc(instId)
+        .collection('myclients');
+
     // Fetch all documents from the collection
     QuerySnapshot querySnapshot = await collection.get();
-    
+
     // Initialize a list to hold the maps
     List<Client> dataList = [];
-    
+
     // Iterate through each document in the collection
     for (QueryDocumentSnapshot document in querySnapshot.docs) {
-
       // Get the data as a map
-      if (document.id != 'default'){
-
+      if (document.id != 'default') {
         Client dataMap = await fetchClientData(document.id);
-        
+
         // Add the map to the list
         dataList.add(dataMap);
-        
       }
-
     }
-    
-    
+
     return dataList;
-  } catch (e,stacktrace) {
+  } catch (e, stacktrace) {
     // Handle errors
-    print('Error fetching documents: $e');
+    debugPrint('Error fetching documents: $e');
     debugPrint('stack: $stacktrace');
     return [];
   }
 }
-
-
-
