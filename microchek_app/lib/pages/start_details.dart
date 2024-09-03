@@ -2,10 +2,18 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:microchek_app/pages/dashboard.dart';
+import 'package:microchek_app/user_configure.dart';
+import 'package:provider/provider.dart';
 // import 'package:flutter/material.dart';
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({super.key});
+  const OnboardingPage({super.key,
+                        required this.uid,
+                        required this.email
+  });
+  final String uid;
+  final String email;
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -16,19 +24,24 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _contactController = TextEditingController();
+  
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState?.validate() ?? false) {
       // Save the data to the database or shared preferences
-      String institutionName = _nameController.text;
-      String location = _locationController.text;
-      String contact = _contactController.text;
-
+      String institutionName = _nameController.text.trim();
+      String location = _locationController.text.trim();
+      String contact = _contactController.text.trim();
+      await createNewInstitution(widget.uid, institutionName, widget.email, contact, location);
+      InstitutionProvider inst = Provider.of<InstitutionProvider>(context, listen: false);
+      await fetchInstitutionData(widget.uid, inst);
       // Logic to save the institution details
       // You can replace this with your logic to save data in the backend or locally
 
       // Navigate to the next page after saving the data
-      Navigator.pushReplacementNamed(context, '/home');
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => GhanaCardValidationPage(),
+            ));
     }
   }
 

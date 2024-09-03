@@ -6,6 +6,8 @@ import 'package:microchek_app/pages/client.dart';
 import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/pages/entry.dart';
 import 'package:microchek_app/pages/start_details.dart';
+import 'package:microchek_app/user_configure.dart';
+import 'package:provider/provider.dart';
 
 // import 'package:flutter/material.dart';
 
@@ -14,6 +16,8 @@ class SampleDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+        InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
+    final currentInst = instProvider.currentInstitution;
     return Drawer(
       child: Column(
         children: [
@@ -76,10 +80,11 @@ class SampleDrawer extends StatelessWidget {
                     'Clients',
                     style: Theme.of(context).textTheme.titleMedium,
                   )),
-                  onTap: () {
+                  onTap: () async {
+                    List<Client> allClients = await fetchClientDataAsList(currentInst!.uid);
                     Navigator.pop(context);
                     Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => ClientPage()));
+                        MaterialPageRoute(builder: (context) => ClientPage(uid: currentInst.uid, allClients: allClients,)));
                   },
                 ),
                 ListTile(
