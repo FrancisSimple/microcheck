@@ -1,7 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+// user_configure.dart
+import 'package:firebase_auth/firebase_auth.dart';import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:microchek_app/pages/dashboard.dart';
+import 'package:microchek_app/utils/forms.dart';
 
 //=========================
 // Client class
