@@ -116,7 +116,7 @@ class _ClientPageState extends State<ClientPage> {
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    items: ['Consider Application', 'Approve Application']
+                    items: ['Consider Application', 'Approve Application', 'Cleared']
                         .map((String status) {
                       return DropdownMenuItem<String>(
                         value: status.split("").first,
