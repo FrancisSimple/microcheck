@@ -9,13 +9,6 @@ import 'package:microchek_app/utils/drawer.dart';
 import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
 
-class UserRecord {
-  String company;
-
-  String status;
-
-  UserRecord(this.company, this.status);
-}
 
 class GhanaCardValidationPage extends StatefulWidget {
   const GhanaCardValidationPage({super.key});
@@ -32,33 +25,32 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   bool _isFound = false;
   bool _isCleared = false;
   Client? thisClient;
-  List<Institution>? clientList = [];
+ 
 
-  // Sample data
-  List<UserRecord> userRecords = [
-    // UserRecord('Company A', 'In Debt'),
-    UserRecord('Company B', 'Cleared'),
-    UserRecord('Company C', 'In Debt'),
-    UserRecord('Company D', 'In Debt'),
-    UserRecord('Company E', 'Cleared'),
-  ];
+
 
   void _validateGhanaCard() async {
     if (_formKey.currentState?.validate() ?? false) {
+
       loadingDialog(context);
       _isValid = true;
       _isFound = await checkClientExists(_ghanaCardController.text);
       if (_isFound) {
         thisClient = await fetchClientData(_ghanaCardController.text);
-        //clientList = thisClient!.allInstitutions;
-
-        debugPrint('Client data Fetched: ${thisClient!.loanNumber}');
-        if (thisClient != null && thisClient!.loanNumber == 0) {
+        //clientList = thisClient!.allInstitutions;        
+        if (thisClient != null) {
           _isCleared = true;
-        } else {
-          _isCleared = false;
-        }
-      } else {
+          for(Institution inst in thisClient!.allInstitutions!){
+            if (inst.status != "Clear"){
+              _isCleared = false;
+              break;
+            }
+          }
+          
+        } 
+
+      } 
+      else {
         _isCleared = true;
       }
       setState(() {
@@ -66,15 +58,14 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         _isFound = _isFound;
         _isCleared = _isCleared;
       });
-    } else {
+      Navigator.of(context).pop();
+    } 
+    else {
       setState(() {
         _isValid = false;
         _isFound = false;
         _isCleared = false;
       });
-    }
-    if (mounted) {
-      Navigator.of(context).pop();
     }
   }
 
@@ -525,9 +516,17 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                           // _showCompanyDetails(context);
                           loadingDialog(context);
 
-                          addInstToClient(_ghanaCardController.text.trim(),
-                              currentInst!.uid, 'consideration');
+                          await addInstToClient(_ghanaCardController.text.trim(),currentInst!.uid, 'Consider Application');
                           Navigator.of(context).pop();
+                          //Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Application put under consideration')),
+                          );
+                          final list = await fetchClientDataAsList(currentInst.uid);
+                          setState(() {
+                            currentInst.allClients = list;
+                          });
+                          await fetchInstitutionData(currentInst.uid, instProvider);
                         },
                         child: Text('Consider Application'),
                       ),
@@ -536,12 +535,18 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async{
                           loadingDialog(context);
                           // _showCompanyDetails(context);
-                          addInstToClient(_ghanaCardController.text.trim(),
-                              currentInst!.uid, 'owing');
+                          await addInstToClient(_ghanaCardController.text.trim(),
+                              currentInst!.uid, 'Approve Application');
                           Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Application approved')),
+                          );
+                          setState(() {
+                          });
+                          await fetchInstitutionData(currentInst.uid, instProvider);
                         },
                         child: Text('Approve Application'),
                       ),
@@ -551,12 +556,10 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                       padding: const EdgeInsets.only(top: 20.0),
                       child: ElevatedButton(
                         onPressed: () async {
-                          loadingDialog(context);
-                          List<Institution> instList =
-                              await fetchInstitutionDataAsList(
-                                  _ghanaCardController.text.trim());
-                          _showCompanyDetails(context, instList);
-                          Navigator.of(context).pop();
+                          //loadingDialog(context);
+                          _showCompanyDetails(context, thisClient!.allInstitutions!);
+                          //Navigator.of(context).pop();
+                          //Navigator.of(context).pop();
                         },
                         child: Text('View Company Details'),
                       ),
@@ -671,6 +674,7 @@ Future<List<Institution>> fetchInstitutionDataAsList(String clientId) async {
       // Get the data as a map
 
       Institution dataMap = await rawInstitutionData(document.id);
+      dataMap.status = document['status'];
 
       // Add the map to the list
       dataList.add(dataMap);
@@ -679,7 +683,7 @@ Future<List<Institution>> fetchInstitutionDataAsList(String clientId) async {
     return dataList;
   } catch (e) {
     // Handle errors
-    print('Error fetching documents: $e');
+    debugPrint('Error fetching documents: $e');
     return [];
   }
 }
@@ -703,6 +707,8 @@ Future<List<Client>> fetchClientDataAsList(String instId) async {
       // Get the data as a map
       if (document.id != 'default') {
         Client dataMap = await fetchClientData(document.id);
+        dataMap.lastUpdated = document['lastUpdated'];
+        dataMap.status = document['status'];
 
         // Add the map to the list
         dataList.add(dataMap);

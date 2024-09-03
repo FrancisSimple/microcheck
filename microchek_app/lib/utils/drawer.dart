@@ -16,8 +16,7 @@ class SampleDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider =
-        Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
     return Drawer(
       child: Column(
@@ -70,7 +69,7 @@ class SampleDrawer extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
 
-                    Navigator.of(context).push(MaterialPageRoute(
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (context) => GhanaCardValidationPage()));
                   },
                 ),
@@ -83,16 +82,13 @@ class SampleDrawer extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   )),
                   onTap: () async {
-                    loadingDialog(context);
-                    List<Client> allClients =
-                        await fetchClientDataAsList(currentInst!.uid);
+                    // loadingDialog(context);
+                    
+                    // Navigator.pop(context);
                     Navigator.pop(context);
-                    Navigator.pop(context);
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => ClientPage(
-                              uid: currentInst.uid,
-                              allClients: allClients,
-                            )));
+                    Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => ClientPage(uid: currentInst!.uid,allClients: currentInst.allClients!,))
+                        );
                   },
                 ),
                 ListTile(
@@ -104,7 +100,7 @@ class SampleDrawer extends StatelessWidget {
                   )),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.of(context).push(
+                    Navigator.of(context).pushReplacement(
                         MaterialPageRoute(builder: (context) => MyMicroPage()));
                   },
                 ),

@@ -36,18 +36,23 @@ class _LoginPageState extends State<LoginPage> {
           // );
           if (await checkInstitution(user.uid)) {
             debugPrint('institution exists');
-            InstitutionProvider institutionProvider =
-                Provider.of<InstitutionProvider>(context, listen: false);
-            debugPrint('fetching user data');
-            await fetchInstitutionData(user.uid, institutionProvider);
-            debugPrint('done fetching');
-            if (mounted) {
-              Navigator.pop(context);
-            }
 
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('You are in. Fetching your data...')),
+            );
+            
+            InstitutionProvider institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+            await fetchInstitutionData(user.uid, institutionProvider);
+            Navigator.pop(context);
             Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) => GhanaCardValidationPage(),
             ));
+            
+            debugPrint('done fetching');
+            
+            
+
+            
           } else {
             Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) =>

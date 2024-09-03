@@ -1,14 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:microchek_app/pages/dashboard.dart';
 
 //=========================
 // Client class
 class Client {
   String name, cardNumber, status;
+  String? lastUpdated;
   int loanNumber;
   String contact;
   String created;
+  List<Institution>? allInstitutions;
 
   Client(this.name, this.cardNumber, {this.status = 'cleared', this.contact = 'not set',this.loanNumber = 0,this.created = 'not set'});
 
@@ -60,6 +63,7 @@ class Client {
 class Institution {
   String name, email, location, contact, uid, status, created;
   int clientNumber;
+  List<Client>? allClients;
 
   Institution(this.name, this.email, this.uid, {this.location = 'Not set', this.contact = 'Not set', this.clientNumber = 0, this.status = 'Not set',this.created = 'not set'});
 
@@ -249,6 +253,7 @@ Future<Institution> fetchInstitutionData(String id, InstitutionProvider institut
     clientNumber: len,
     created: userSnapshot['created']
   );
+  currentInstitution.allClients = await fetchClientDataAsList(id);
 
   institutionProvider.setCurrentInstitution(currentInstitution);
   return currentInstitution;
@@ -276,6 +281,8 @@ Future<Institution> rawInstitutionData(String id) async {
   );
   return currentInstitution;
 }
+
+
 Future<void> addInstToClient(String clientNumber,String instId,String status,{String? name, String? contact}) async{
 
   final searchClient = await FirebaseFirestore.instance.collection('clients').doc(clientNumber).get();
@@ -322,6 +329,10 @@ Future<void> addInstToClient(String clientNumber,String instId,String status,{St
   }
 }
 
+
+
+ 
+
 Future<bool> createNewInstitution(String uid, String name, String email, String contact, String location) async {
   try {
     await FirebaseFirestore.instance.collection('institutions').doc(uid).set({
@@ -359,9 +370,8 @@ Future<Client> fetchClientData(String number) async {
   final collectSnap = FirebaseFirestore.instance.collection('clients').doc(number).collection('myinstitutions');
   final query = await collectSnap.get();
   int len = query.size;
-  debugPrint('len inside: $len');
-  
-  return Client(
+
+  Client client = Client(
     data['name'] ?? 'Unknown',
     number,
     status: data['status'] ?? 'Unknown',
@@ -371,6 +381,9 @@ Future<Client> fetchClientData(String number) async {
     
 
   );
+  client.allInstitutions = await fetchInstitutionDataAsList(number);
+
+  return client;
 }
 
 

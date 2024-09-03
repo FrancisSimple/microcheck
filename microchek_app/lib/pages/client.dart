@@ -2,11 +2,14 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/user_configure.dart';
 // import 'package:flutter/material.dart';
 import 'package:microchek_app/utils/drawer.dart';
 import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+
 
 class ClientPage extends StatefulWidget {
   const ClientPage({super.key, required this.uid, required this.allClients});
@@ -36,7 +39,7 @@ class _ClientPageState extends State<ClientPage> {
     });
   }
 
-  void _showEditClientDialog(BuildContext context,Client client) {
+  void _showEditClientDialog(BuildContext context,Client client, Institution inst, InstitutionProvider instProvider) {
 
     final TextEditingController nameController =
         TextEditingController(text: client.name);
@@ -100,10 +103,10 @@ class _ClientPageState extends State<ClientPage> {
                         ),
                       );
                     }).toList(),
-                    onChanged: (newValue) {
+                    onChanged: (newValue) async{
                       setState(() {
                         selectedStatus = newValue;
-                      });
+                      });                      
                     },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -133,11 +136,15 @@ class _ClientPageState extends State<ClientPage> {
                 setState(() {
                   client.name = nameController.text.trim();
                   client.cardNumber = ghanaCardController.text.trim();
+                  client.status = selectedStatus!;
+                  buildClientTable(context, filteredRecords,inst,instProvider);
                 });
-                await addInstToClient(
-                    client.cardNumber, widget.uid, selectedStatus!);
+                await addInstToClient(client.cardNumber, widget.uid, selectedStatus!);
                 Navigator.of(context).pop();
                 Navigator.of(context).pop();
+                
+                await fetchInstitutionData(widget.uid, instProvider);
+                
               },
             ),
           ],
@@ -148,8 +155,7 @@ class _ClientPageState extends State<ClientPage> {
 
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider =
-        Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
 
     //filteredRecords = await fetchInstitutionDataAsList(currentInst!.uid);
@@ -181,7 +187,7 @@ class _ClientPageState extends State<ClientPage> {
             ),
             SizedBox(height: 16.0),
             Expanded(
-              child: buildClientTable(context, filteredRecords),
+              child: buildClientTable(context, filteredRecords,currentInst!,instProvider),
             ),
           ],
         ),
@@ -189,7 +195,7 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-  Widget buildClientTable(BuildContext context, List<Client> records) {
+  Widget buildClientTable(BuildContext context, List<Client> records, Institution inst, InstitutionProvider instProvider) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
@@ -209,12 +215,12 @@ class _ClientPageState extends State<ClientPage> {
                 DataCell(Text(records[index].name)),
                 DataCell(Text(records[index].cardNumber)),
                 DataCell(Center(child: Text(records[index].status))),
-                DataCell(Text('Not needed again')),
+                DataCell(Text(formatDate(records[index].lastUpdated!))),
                 DataCell(
                   ElevatedButton(
                     onPressed: () {
                       // loadingDialog(context);
-                      _showEditClientDialog(context,records[index]);
+                      _showEditClientDialog(context,records[index], inst,instProvider);
                       // Navigator.of(context).pop();
                     },
                     child: Text(
@@ -254,4 +260,13 @@ class _ClientPageState extends State<ClientPage> {
       ),
     );
   }
+}
+
+
+
+String formatDate(String dateInString){
+  DateTime datetime = DateTime.parse(dateInString);
+  DateFormat formatter = DateFormat('MMMM dd, yyyy');
+  return formatter.format(datetime);
+  
 }
