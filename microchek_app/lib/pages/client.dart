@@ -6,10 +6,10 @@ import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/user_configure.dart';
 // import 'package:flutter/material.dart';
 import 'package:microchek_app/utils/drawer.dart';
-import 'package:microchek_app/utils/forms.dart';
 import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+
 
 class ClientPage extends StatefulWidget {
   const ClientPage({super.key, required this.uid, required this.allClients});
@@ -29,10 +29,133 @@ class _ClientPageState extends State<ClientPage> {
     filteredRecords = widget.allClients;
   }
 
+  void _filterClients(String query) {
+    final lowerQuery = query.toLowerCase();
+    setState(() {
+      filteredRecords = widget.allClients.where((client) {
+        return client.name.toLowerCase().contains(lowerQuery) ||
+            client.cardNumber.toLowerCase().contains(lowerQuery);
+      }).toList();
+    });
+  }
+
+  void _showEditClientDialog(BuildContext context,Client client, Institution inst, InstitutionProvider instProvider) {
+
+    final TextEditingController nameController =
+        TextEditingController(text: client.name);
+    final TextEditingController ghanaCardController =
+        TextEditingController(text: client.cardNumber);
+    String? selectedStatus; // Variable to store the selected dropdown value
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Text(
+            'Update Client Info',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          content: SingleChildScrollView(
+            child: Form(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _buildTextFormField(
+                    'Name',
+                    Icons.person,
+                    controller: nameController,
+                  ),
+                  SizedBox(height: 10),
+                  _buildTextFormField(
+                    'Ghana Card Number',
+                    Icons.payment_rounded,
+                    controller: ghanaCardController,
+                  ),
+                  SizedBox(height: 20),
+                  DropdownButtonFormField<String>(
+                    value: selectedStatus,
+                    decoration: InputDecoration(
+                      labelText: 'Application Status',
+                      prefixIcon: Icon(
+                        Icons.assignment,
+                        color: Colors.amber,
+                      ),
+                      filled: true,
+                      // fillColor: Colors.grey[200],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    items: [
+                      'Consider Application',
+                      'Approve Application',
+                      'Clear'
+                    ].map((String status) {
+                      return DropdownMenuItem<String>(
+                        value: status,
+                        child: Text(
+                          status,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) async{
+                      setState(() {
+                        selectedStatus = newValue;
+                      });                      
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select an application status';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: Colors.redAccent),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Update'),
+              onPressed: () async {
+                loadingDialog(context);
+                setState(() {
+                  client.name = nameController.text.trim();
+                  client.cardNumber = ghanaCardController.text.trim();
+                  client.status = selectedStatus!;
+                  buildClientTable(context, filteredRecords,inst,instProvider);
+                });
+                await addInstToClient(client.cardNumber, widget.uid, selectedStatus!);
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+                
+                await fetchInstitutionData(widget.uid, instProvider);
+                
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider =
-        Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
 
     //filteredRecords = await fetchInstitutionDataAsList(currentInst!.uid);
@@ -64,8 +187,7 @@ class _ClientPageState extends State<ClientPage> {
             ),
             SizedBox(height: 16.0),
             Expanded(
-              child: buildClientTable(
-                  context, filteredRecords, currentInst!, instProvider),
+              child: buildClientTable(context, filteredRecords,currentInst!,instProvider),
             ),
           ],
         ),
@@ -73,13 +195,7 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-// Client Data Table
-  Widget buildClientTable(
-    BuildContext context,
-    List<Client> records,
-    Institution inst,
-    InstitutionProvider instProvider,
-  ) {
+  Widget buildClientTable(BuildContext context, List<Client> records, Institution inst, InstitutionProvider instProvider) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
@@ -104,14 +220,7 @@ class _ClientPageState extends State<ClientPage> {
                   ElevatedButton(
                     onPressed: () {
                       // loadingDialog(context);
-                      showEditClientDialog(
-                        context,
-                        records[index],
-                        inst,
-                        instProvider,
-                        widget.uid,
-                        _filterClients,
-                      );
+                      _showEditClientDialog(context,records[index], inst,instProvider);
                       // Navigator.of(context).pop();
                     },
                     child: Text(
@@ -128,14 +237,36 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-// Filter Function
-  void _filterClients(String query) {
-    final lowerQuery = query.toLowerCase();
-    setState(() {
-      filteredRecords = widget.allClients.where((client) {
-        return client.name.toLowerCase().contains(lowerQuery) ||
-            client.cardNumber.toLowerCase().contains(lowerQuery);
-      }).toList();
-    });
+  Widget _buildTextFormField(
+    String label,
+    IconData icon, {
+    required TextEditingController controller,
+  }) {
+    return TextFormField(
+      controller: controller,
+      enabled: false,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(
+          icon,
+          color: Colors.amber,
+        ),
+        filled: true,
+        // fillColor: Colors.grey[200],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
   }
+}
+
+
+
+String formatDate(String dateInString){
+  DateTime datetime = DateTime.parse(dateInString);
+  DateFormat formatter = DateFormat('MMMM dd, yyyy');
+  return formatter.format(datetime);
+  
 }

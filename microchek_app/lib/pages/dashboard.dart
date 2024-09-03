@@ -352,7 +352,6 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
               onPressed: () async {
                 if (formKey.currentState?.validate() ?? false) {
                   // Implement the logic to add the user to the system here
-                  debugPrint("Validated");
                   loadingDialog(context);
                   await addInstToClient(_ghanaCardController.text.trim(),
                       institution.uid, selectedStatus!,
