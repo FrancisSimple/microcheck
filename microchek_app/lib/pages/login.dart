@@ -2,7 +2,6 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/pages/start_details.dart';
@@ -90,6 +89,7 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           Padding(
             padding: const EdgeInsets.only(
+              top: 50,
               left: 16.0,
               right: 16.0,
               bottom: 16,

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:microchek_app/pages/client.dart';
 import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/pages/entry.dart';
-import 'package:microchek_app/pages/start_details.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';

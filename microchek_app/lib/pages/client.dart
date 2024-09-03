@@ -1,9 +1,7 @@
 // pages/client.dart
 // ignore_for_file: prefer_const_constructors
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/user_configure.dart';
 // import 'package:flutter/material.dart';
 import 'package:microchek_app/utils/drawer.dart';
@@ -38,7 +36,8 @@ class _ClientPageState extends State<ClientPage> {
     });
   }
 
-  void _showEditClientDialog(Client client) {
+  void _showEditClientDialog(BuildContext context,Client client) {
+
     final TextEditingController nameController =
         TextEditingController(text: client.name);
     final TextEditingController ghanaCardController =
@@ -91,7 +90,7 @@ class _ClientPageState extends State<ClientPage> {
                     items: [
                       'Consider Application',
                       'Approve Application',
-                      'Cleared'
+                      'Clear'
                     ].map((String status) {
                       return DropdownMenuItem<String>(
                         value: status,
@@ -200,7 +199,7 @@ class _ClientPageState extends State<ClientPage> {
             DataColumn(label: Text('Name')),
             DataColumn(label: Text('Ghana Card Number')),
             DataColumn(label: Center(child: Text('Status'))),
-            // DataColumn(label: Text('Last Updated')),
+            DataColumn(label: Text('Last Updated')),
             DataColumn(label: Text('')),
           ],
           rows: List<DataRow>.generate(
@@ -210,17 +209,17 @@ class _ClientPageState extends State<ClientPage> {
                 DataCell(Text(records[index].name)),
                 DataCell(Text(records[index].cardNumber)),
                 DataCell(Center(child: Text(records[index].status))),
-                // DataCell(Text('Not needed again')),
+                DataCell(Text('Not needed again')),
                 DataCell(
                   ElevatedButton(
                     onPressed: () {
-                      loadingDialog(context);
-                      // _showEditClientDialog(records[index]);
-                      Navigator.of(context).pop();
+                      // loadingDialog(context);
+                      _showEditClientDialog(context,records[index]);
+                      // Navigator.of(context).pop();
                     },
                     child: Text(
-                      'Clear',
-                      style: TextStyle(color: Colors.redAccent),
+                      'Update',
+                      // style: TextStyle(color: Colors.redAccent),
                     ),
                   ),
                 ),
