@@ -558,7 +558,7 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          child: const Text('Save Changes'),
+          child: const Text('Save'),
         ),
       ],
     );
