@@ -88,11 +88,14 @@ class Institution {
         allClients!.remove(person);
         allClients!.add(client);
         found = true;
+        debugPrint('Client replaced');
         break;
+        
       }
     }
     if(!found){
       allClients!.add(client);
+      debugPrint('Client added');
     }
     
   }

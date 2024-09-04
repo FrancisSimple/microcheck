@@ -39,6 +39,7 @@ class _ClientPageState extends State<ClientPage> {
     InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
 
+
     //filteredRecords = await fetchInstitutionDataAsList(currentInst!.uid);
     return Scaffold(
       appBar: AppBar(

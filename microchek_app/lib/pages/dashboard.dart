@@ -23,13 +23,12 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   final TextEditingController _ghanaCardController = TextEditingController();
   bool _isValid = false;
   bool _isFound = false;
-  bool _isCleared = false;
+  bool _isCleared = false,isWithMe = false;
   Client? thisClient;
 
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider =
-        Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
     //fetchInstitutionData(currentInst!.uid, instProvider);
     return Scaffold(
@@ -85,7 +84,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     },
                     child: Text('Check'),
                   ),
-                  if (_isCleared && _isValid)
+                  if ((_isFound && _isCleared && _isValid) ||(_isValid && isWithMe && _isCleared) || (!_isFound && _isValid))
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
                       child: Text("Person is clear"),
@@ -103,8 +102,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                   fontSize: 16,
                                 ),
                               )),
-                  if ((_isCleared && _isValid) ||
-                      (!_isFound && _isValid && _isCleared))
+                  if ((_isFound && _isCleared && _isValid) ||(_isValid && isWithMe && _isCleared)|| (!_isFound && _isValid))
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
                       child: Column(
@@ -137,35 +135,36 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                                 onPressed: () async {
                                                   loadingDialog(context);
                                                   try {
+                                                    debugPrint('size before: ${currentInst!.allClients!.length}');
                                                     await addInstToClient(
                                                         _ghanaCardController
                                                             .text
                                                             .trim(),
-                                                        currentInst!.uid,
+                                                        currentInst.uid,
                                                         'Under Consideration');
-
-                                                    Client client =
-                                                        await fetchClientData(
-                                                            _ghanaCardController
-                                                                .text
-                                                                .trim());
-                                                    setState(() {
-                                                      currentInst.replaceClient(
-                                                          client);
-                                                    });
-                                                    instProvider
-                                                        .setCurrentInstitution(
-                                                            currentInst);
+                                                        
+                                                        //currentInst.replaceClient(client);
+                                                        
+                                                    
+                                                    Client client = await fetchDirectClientData(_ghanaCardController.text.trim(),currentInst.uid);
+                                                    Navigator.pop(context);
+                                                    // setState(() {
+                                                    //   currentInst.replaceClient(
+                                                    //       client);
+                                                    // });
+                                                    instProvider.currentInstitution!.replaceClient(client);
+                                                    instProvider.setCurrentInstitution(currentInst);
+                                                    debugPrint('size after: ${currentInst.allClients!.length}');
                                                   } catch (e) {
                                                     debugPrint(
                                                         'error message here: $e');
                                                   }
-                                                  Navigator.pop(context);
+                                                  
                                                   ScaffoldMessenger.of(context)
                                                       .showSnackBar(
                                                     SnackBar(
                                                         content: Text(
-                                                            'You are in. Fetching your data...')),
+                                                            'Person added successfully')),
                                                   );
                                                   Navigator.pop(context);
                                                   Navigator.pop(context);
@@ -186,7 +185,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                         ],
                       ),
                     ),
-                  if (_isFound && _isValid && !_isCleared)
+                  if ((_isFound && !_isCleared && _isValid) ||(_isValid && isWithMe && !_isCleared))
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
                       child: ElevatedButton(
@@ -236,7 +235,20 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         });
       }
 
-      if (_isFound) {
+      for (Client client3 in inst.allClients!) {
+        if (client3.cardNumber == _ghanaCardController.text.trim()) {
+          isWithMe = true;
+          thisClient = client3;
+          debugPrint('Client found with me:');
+          //  _ghanaCardController.clear();
+          break;
+        }
+        setState(() {
+          isWithMe = false;
+        });
+      }
+
+      if (_isFound || isWithMe) {
         _isCleared = true;
 
         // Step 2: Check if this client has been cleared
@@ -263,7 +275,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
         // Additional debug info
         debugPrint('Client clearance status: $_isCleared');
-      } else {
+      } 
+      else {
         _isCleared = true; // No record means no issues found
       }
 
