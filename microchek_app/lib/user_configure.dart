@@ -63,7 +63,8 @@ class Client {
 class Institution {
   String name, email, location, contact, uid, status, created;
   int clientNumber;
-  List<Client>? allClients;
+  String? lastUpdated;
+  List<Client>? allClients, databaseClients;
 
   Institution(this.name, this.email, this.uid, {this.location = 'Not set', this.contact = 'Not set', this.clientNumber = 0, this.status = 'Not set',this.created = 'not set'});
 
@@ -78,6 +79,22 @@ class Institution {
   void setStatus(String newStatus) async {
     status = newStatus;
 
+  }
+
+  void replaceClient(Client client){
+    bool found = false;
+    for(Client person in allClients!){
+      if (client.cardNumber == person.cardNumber){
+        allClients!.remove(person);
+        allClients!.add(client);
+        found = true;
+        break;
+      }
+    }
+    if(!found){
+      allClients!.add(client);
+    }
+    
   }
 
 
@@ -105,69 +122,7 @@ class Institution {
     );
   }
 
-// Future<bool> addClient(String number, String status, InstitutionProvider instProvider, {String? name}) async {
-//   DateTime date = DateTime.now();
 
-//   // Check if the client already exists
-//   bool clientExists = await checkClientExists(number);
-
-//   if (clientExists) {
-//     // Fetch existing client data
-//     Client currentClient = await fetchClientData(number);
-
-//     // Update client's status and last updated date
-//     currentClient.updateStatus(status, date.toString());
-
-//     // Add the current institution to the client's institution list
-//     bool addedToClient = await currentClient.addInstitution(this);
-
-//     if (!addedToClient) {
-//       debugPrint('Failed to add institution to client');
-//       return false;
-//     }
-
-//     // Add the client to the institution's client list
-//     allClients!.add(currentClient);
-
-//     // Update both client and institution data in Firestore
-//     bool clientUpdated = await updateClientData(currentClient);
-//     bool institutionUpdated = await updateInstitutionData(uid, instProvider);
-
-//     if (!clientUpdated || !institutionUpdated) {
-//       debugPrint('Failed to update either client or institution data');
-//       return false;
-//     }
-//   } else {
-//     // Create a new client
-//     Client newClient = Client(
-//       name!,
-//       number,
-//       status: status,
-//       lastUpdated: date.toString(),
-//       //allInstitutions: [this], // Add the current institution to new client's institution list
-//     );
-
-//     // Store the new client in Firestore
-//     await FirebaseFirestore.instance.collection('clients').doc(number).set(newClient.toJson());
-
-//     // Add the new client to the institution's client list
-//     allClients!.add(newClient);
-
-//     // Store the institution's data in the client's institutions sub-collection
-//     await FirebaseFirestore.instance.collection('clients').doc(number).collection('myinstitutions').doc(uid).set(toJson());
-
-//     // Update both client and institution data in Firestore
-//     bool clientAddedToInstitution = await newClient.addInstitution(this);
-//     bool institutionUpdated = await updateInstitutionData(uid, instProvider);
-
-//     if (!clientAddedToInstitution || !institutionUpdated) {
-//       debugPrint('Failed to add institution to new client or update institution data');
-//       return false;
-//     }
-//   }
-
-//   return true;
-// }
  }
 // End of institution class
 
@@ -254,6 +209,7 @@ Future<Institution> fetchInstitutionData(String id, InstitutionProvider institut
     created: userSnapshot['created']
   );
   currentInstitution.allClients = await fetchClientDataAsList(id);
+  currentInstitution.databaseClients = await fetchAllClientDataAsList();
 
   institutionProvider.setCurrentInstitution(currentInstitution);
   return currentInstitution;
@@ -270,6 +226,26 @@ Future<Institution> rawInstitutionData(String id) async {
   final query = await collectSnap.get();
   int len = query.size-1;
 
+  List<Client> dataList = [];
+  //final collectSnap2 = FirebaseFirestore.instance.collection('institutions').doc(id).collection('myclients');
+  for (QueryDocumentSnapshot document in query.docs) {
+      // Get the data as a map
+      Client dataMap;
+      if (document.id != 'default') {
+         dataMap = Client(
+                          document['name'] ?? 'Unknown',
+                          document['number'],
+                          status: document['status'] ?? 'Unknown',
+                          contact: document['contact'] ?? '',
+                          loanNumber: len,
+                          );
+        dataMap.lastUpdated = document['lastUpdated'];
+        //dataMap.allInstitutions = await fetchInstitutionDataAsList(document.id);
+        // Add the map to the list
+        dataList.add(dataMap);
+      }
+      
+    }
   Institution currentInstitution = Institution(
     userSnapshot['name'],
     userSnapshot['email'],
@@ -279,12 +255,18 @@ Future<Institution> rawInstitutionData(String id) async {
     clientNumber: len,
     created: userSnapshot['created']
   );
+  currentInstitution.allClients = dataList;
+  
   return currentInstitution;
 }
 
+// Future<void> fetchAllClients() async{
+
+// }
 
 Future<void> addInstToClient(String clientNumber,String instId,String status,{String? name, String? contact}) async{
 
+  final searchInst = await FirebaseFirestore.instance.collection('institutions').doc(instId).get();
   final searchClient = await FirebaseFirestore.instance.collection('clients').doc(clientNumber).get();
   if (!searchClient.exists){
     await FirebaseFirestore.instance.collection('clients').doc(clientNumber).set({
@@ -296,19 +278,31 @@ Future<void> addInstToClient(String clientNumber,String instId,String status,{St
     'loanNumber': 0,
     'contact': contact,
     });
+    
   }
-
+  final searchClient2 = await FirebaseFirestore.instance.collection('clients').doc(clientNumber).get();
   final docSearch = await FirebaseFirestore.instance.collection('clients').doc(clientNumber).collection('myinstitutions').doc(instId).get();
   if (docSearch.exists){
+
     await FirebaseFirestore.instance.collection('clients').doc(clientNumber).collection('myinstitutions').doc(instId).update({
+      'name': searchInst['name'],
+      'email':searchInst['email'],
+      'contact': searchInst['contact'],
+      'location': searchInst['location'],
+      'clientNumber': 0,
       'status': status,
       'lastUpdated': DateTime.now().toString()
     });
   }
   else{
     await FirebaseFirestore.instance.collection('clients').doc(clientNumber).collection('myinstitutions').doc(instId).set({
+      'name': searchInst['name'],
+      'email':searchInst['email'],
+      'contact': searchInst['contact'],
+      'location': searchInst['location'],
+      'clientNumber': 0,
       'status': status,
-      'lastUpdated': DateTime.now().toString() 
+      'lastUpdated': DateTime.now().toString()
     });
 
   }
@@ -316,14 +310,24 @@ Future<void> addInstToClient(String clientNumber,String instId,String status,{St
     final doc2Search = await FirebaseFirestore.instance.collection('institutions').doc(instId).collection('myclients').doc(clientNumber).get();
   if (doc2Search.exists){
     await FirebaseFirestore.instance.collection('institutions').doc(instId).collection('myclients').doc(clientNumber).update({
-      'status': status,
-      'lastUpdated': DateTime.now().toString()
+    'name': (name == null) ? searchClient['name']: name,
+    'number': searchClient2['number'],
+    'status': status,
+    //'lastUpdated': DateTime.now().toString(),
+    'lastUpdated': DateTime.now().toString(),
+    'loanNumber': 0,
+    'contact': searchClient2['contact'],
     });
   }
   else{
     await FirebaseFirestore.instance.collection('institutions').doc(instId).collection('myclients').doc(clientNumber).set({
-      'status': status,
-      'lastUpdated': DateTime.now().toString() 
+    'name': (name == null) ? searchClient2['name']: name,
+    'number': searchClient2['number'],
+    'status': status,
+    //'lastUpdated': DateTime.now().toString(),
+    'lastUpdated': DateTime.now().toString(),
+    'loanNumber': 0,
+    'contact': searchClient2['contact'],
     });
     
   }
@@ -370,7 +374,23 @@ Future<Client> fetchClientData(String number) async {
   final collectSnap = FirebaseFirestore.instance.collection('clients').doc(number).collection('myinstitutions');
   final query = await collectSnap.get();
   int len = query.size;
-
+  List<Institution> dataList = [];
+  //final collectSnap2 = FirebaseFirestore.instance.collection('institutions').doc(id).collection('myclients');
+  for (QueryDocumentSnapshot document in query.docs) {
+      // Get the data as a map
+      if (document.id != 'default') {
+        Institution dataMap = Institution(
+                          document['name'] ?? 'Unknown',
+                          document.id,
+                          document['email'],
+                          status: document['status'] ?? 'Unknown',
+                          contact: document['contact'] ?? '',                          
+                          );
+        dataMap.lastUpdated = document['lastUpdated'];
+        // Add the map to the list
+        dataList.add(dataMap);
+      }
+    }
   Client client = Client(
     data['name'] ?? 'Unknown',
     number,
@@ -381,9 +401,60 @@ Future<Client> fetchClientData(String number) async {
     
 
   );
-  client.allInstitutions = await fetchInstitutionDataAsList(number);
+  client.allInstitutions = dataList;
 
   return client;
+}
+
+
+
+// Function to fetch client data
+Future<Client> fetchDirectClientData(String number, String instId) async {
+  try {
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('institutions').doc(instId).collection('myclients').doc(number)
+        .get();
+    debugPrint('snapshot obtained: ${userSnapshot.exists}');
+
+    if (!userSnapshot.exists || userSnapshot.data() == null) {
+      throw Exception('Client not found or data is null');
+    }
+
+    // Proceed only if the data exists
+    final collectSnap = FirebaseFirestore.instance
+        .collection('clients')
+        .doc(number)
+        .collection('myinstitutions');
+    
+    final query = await collectSnap.get();
+    debugPrint('got query: $query');
+
+    List<Institution> dataList = [];
+    for (QueryDocumentSnapshot document in query.docs) {
+      if (document.id != 'default') {
+        Institution dataMap = Institution(
+          document['name'] ?? 'Unknown',
+          document.id,
+          document['email'],
+          status: document['status'] ?? 'Unknown',
+          contact: document['contact'] ?? '',
+        );
+        dataMap.lastUpdated = document['lastUpdated'];
+        dataList.add(dataMap);
+      }
+    }
+
+    Client client = Client(
+      userSnapshot['name'] ?? 'Unknown',number,status: userSnapshot['status'] ?? 'Unknown',contact: userSnapshot['contact'] ?? ''
+    );
+    client.lastUpdated = userSnapshot['lastUpdated'];
+    client.allInstitutions = dataList;
+    debugPrint('client formed status: ${client.status}');
+
+    return client;
+  } catch (e) {
+    debugPrint('Error fetching direct client data: $e');
+    throw Exception('Error in fetching direct client data');
+  }
 }
 
 

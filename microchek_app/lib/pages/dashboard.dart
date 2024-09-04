@@ -28,8 +28,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider =
-        Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
     //fetchInstitutionData(currentInst!.uid, instProvider);
     return Scaffold(
@@ -77,27 +76,16 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   ),
                   SizedBox(height: 50),
                   ElevatedButton(
-                    onPressed: validateGhanaCard,
+                    onPressed: (){
+                      validateGhanaCard(currentInst!);
+                      },
                     child: Text('Check'),
                   ),
-                  // if (_isValid)
-                  //   Padding(
-                  //     padding: const EdgeInsets.only(top: 20.0),
-                  //     child: Text(
-                  //       _isFound
-                  //           ? 'Existing Records Found!'
-                  //           : 'No Existing Records!',
-                  //       style: TextStyle(
-                  //         color: _isFound ? Colors.red : Colors.green,
-                  //         fontSize: 16,
-                  //       ),
-                  //     ),
-                  //   ),
-                  //
+
                   if (_isCleared && _isValid)
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
-                      child: Text("Applicant is Cleared"),
+                      child: Text("Person is clear"),
                     )
                   else
                     Padding(
@@ -105,14 +93,14 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                         child: !_isValid
                             ? Text("")
                             : Text(
-                                'Applicant is Not Cleared!',
+                                'Person not cleared!',
                                 style: TextStyle(
                                   color:
                                       !_isCleared ? Colors.red : Colors.green,
                                   fontSize: 16,
                                 ),
                               )),
-                  if (_isCleared && _isValid)
+                  if ((_isCleared && _isValid) || (!_isFound && _isValid && _isCleared))
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
                       child: Column(
@@ -126,21 +114,30 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                               SizedBox(),
                               ElevatedButton(
                                 onPressed: () async {
+                                  loadingDialog(context);
+                                  try{
+                                    await addInstToClient(_ghanaCardController.text.trim(), currentInst!.uid, 'Under Consideration');
+                                    Navigator.pop(context);
+                                    Client client = await fetchClientData(_ghanaCardController.text.trim());
+                                    setState(() {
+                                      currentInst.replaceClient(client);                                      
+                                  });
+                                  instProvider.setCurrentInstitution(currentInst);
+                                  }
+                                  catch(e){
+                                    debugPrint('error message here: $e');
+                                  }                           
                                   
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('You are in. Fetching your data...')),
+                                    );
                                 },
                                 child: Text(
                                   'Yes',
                                   style: TextStyle(color: Colors.green),
                                 ),
                               ),
-                              // SizedBox(
-                              //   height: 30,
-                              // ),
-                              // ElevatedButton(
-                              //   onPressed: () async {},
-                              //   child: Text('No',
-                              //       style: TextStyle(color: Colors.red)),
-                              // ),
+
                               SizedBox(),
                             ],
                           )
@@ -153,47 +150,46 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                       child: ElevatedButton(
                         onPressed: () async {
                           //loadingDialog(context);
-                          _showCompanyDetails(
-                              context, thisClient!.allInstitutions!);
+                          _showCompanyDetails(context, thisClient!.allInstitutions!);
                           //Navigator.of(context).pop();
                           //Navigator.of(context).pop();
                         },
-                        child: Text('View Company Details'),
+                        child: Text('View Institution Details'),
                       ),
                     ),
-                  if (!_isFound && _isValid)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // loadingDialog(context);
-                          showAddUserForm(context, currentInst!, instProvider,
-                              controllerText: _ghanaCardController.text);
-                          // Navigator.of(context).pop();
-                        },
-                        child: Text('Add Applicant'),
-                      ),
-                    ),
+                  // if (!_isFound && _isValid)
+                  //   Padding(
+                  //     padding: const EdgeInsets.only(top: 20.0),
+                  //     child: ElevatedButton(
+                  //       onPressed: () {
+                  //         // loadingDialog(context);
+                  //         showAddUserForm(context, currentInst!, instProvider,
+                  //             controllerText: _ghanaCardController.text);
+                  //         // Navigator.of(context).pop();
+                  //       },
+                  //       child: Text('Add Applicant'),
+                  //     ),
+                  //   ),
                 ],
               ),
             ),
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Implement the functionality to add a user to the system here
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     // Implement the functionality to add a user to the system here
 
-          showAddUserForm(context, currentInst!, instProvider,
-              controllerText: _ghanaCardController.text, autofill: true);
-          // Navigator.of(context).pop();
-        },
-        tooltip: 'Add Applicant',
-        child: Icon(
-          Icons.person_add,
-          // color: Colors.amber,
-        ),
-      ),
+      //     showAddUserForm(context, currentInst!, instProvider,
+      //         controllerText: _ghanaCardController.text, autofill: true);
+      //     // Navigator.of(context).pop();
+      //   },
+      //   tooltip: 'Add Applicant',
+      //   child: Icon(
+      //     Icons.person_add,
+      //     // color: Colors.amber,
+      //   ),
+      // ),
     );
   }
 
@@ -204,40 +200,68 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
     return regExp.hasMatch(number);
   }
 
-  void validateGhanaCard() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      loadingDialog(context);
-      _isValid = true;
-      _isFound = await checkClientExists(_ghanaCardController.text);
-      if (_isFound) {
-        thisClient = await fetchClientData(_ghanaCardController.text);
-        //clientList = thisClient!.allInstitutions;
-        if (thisClient != null) {
-          _isCleared = true;
-          for (Institution inst in thisClient!.allInstitutions!) {
-            if (inst.status != "Clear") {
-              _isCleared = false;
-              break;
-            }
-          }
-        }
-      } else {
-        _isCleared = true;
+  void validateGhanaCard(Institution inst) async {
+  if (_formKey.currentState?.validate() ?? false) {
+    loadingDialog(context);
+    _isValid = true;
+
+    // Step 1: Check if the Ghana Card is in the database
+    for (Client client in inst.databaseClients!) {
+      
+      if (client.cardNumber == _ghanaCardController.text.trim()) {
+        _isFound = true;
+        thisClient = client;
+        debugPrint('Client found in database.');
+        break;
       }
-      setState(() {
-        _isValid = _isValid;
-        _isFound = _isFound;
-        _isCleared = _isCleared;
-      });
-      Navigator.of(context).pop();
-    } else {
-      setState(() {
-        _isValid = false;
-        _isFound = false;
-        _isCleared = false;
-      });
     }
+
+    if (_isFound) {
+      _isCleared = true;
+
+      // Step 2: Check if this client has been cleared
+      for (Client client2 in inst.allClients!) {
+        if (client2.cardNumber == thisClient!.cardNumber) {
+          debugPrint('client matches: ${client2.cardNumber} and ${inst.uid}');
+          thisClient = await fetchDirectClientData(client2.cardNumber, inst.uid);
+          debugPrint('fetched direct client');
+            for (Institution inst in thisClient!.allInstitutions!) {
+              debugPrint('enterd the loop for all institutions of this new client fetched');
+              if (inst.status != "Clear") {
+                _isCleared = false;
+                debugPrint('clear data updated');
+                break;
+              }
+            }
+          
+
+          break;
+        }
+      }
+
+      // Additional debug info
+      debugPrint('Client clearance status: $_isCleared');
+    } else {
+      _isCleared = true; // No record means no issues found
+    }
+
+    // Update UI
+    setState(() {
+      _isValid = _isValid;
+      _isFound = _isFound;
+      _isCleared = _isCleared;
+    });
+
+    Navigator.of(context).pop(); // Close loading dialog
+  } else {
+    setState(() {
+      _isValid = false;
+      _isFound = false;
+      _isCleared = false;
+    });
   }
+}
+
 
   // bool _checkIfUserExists(String cardNumber) {
   //   return cardNumber == "GHA-123456789-0"; // Example Ghana Card number
@@ -250,7 +274,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         return AlertDialog(
           insetPadding: EdgeInsets.all(10),
           contentPadding: EdgeInsets.all(10),
-          title: Text('Applicant Records'),
+          title: Text('Person Records'),
           content: SizedBox(
             width: MediaQuery.sizeOf(context).width,
             height: MediaQuery.sizeOf(context).height,
@@ -476,8 +500,69 @@ Future<List<Client>> fetchClientDataAsList(String instId) async {
       // Get the data as a map
       if (document.id != 'default') {
         Client dataMap = await fetchClientData(document.id);
-        dataMap.lastUpdated = document['lastUpdated'];
-        dataMap.status = document['status'];
+
+        // Add the map to the list
+        dataList.add(dataMap);
+      }
+    }
+
+    return dataList;
+  } catch (e, stacktrace) {
+    // Handle errors
+    debugPrint('Error fetching documents: $e');
+    debugPrint('stack: $stacktrace');
+    return [];
+  }
+}
+
+
+Future<List<Client>> fetchAllClientDataAsList() async {
+  try {
+    // Get a reference to the Firestore collection
+    CollectionReference collection = FirebaseFirestore.instance.collection('clients');
+
+    // Fetch all documents from the collection
+    QuerySnapshot querySnapshot = await collection.get();
+
+    // Initialize a list to hold the maps
+    List<Client> dataList = [];
+
+    // Iterate through each document in the collection
+    for (QueryDocumentSnapshot document in querySnapshot.docs) {
+      // Get the data as a map
+      if (document.id != 'default') {
+        Client dataMap = await fetchClientData(document.id);
+
+        // Add the map to the list
+        dataList.add(dataMap);
+      }
+    }
+
+    return dataList;
+  } catch (e, stacktrace) {
+    // Handle errors
+    debugPrint('Error fetching documents: $e');
+    debugPrint('stack: $stacktrace');
+    return [];
+  }
+}
+
+Future<List<Institution>> fetchAllInstitutionsDataAsList() async {
+  try {
+    // Get a reference to the Firestore collection
+    CollectionReference collection = FirebaseFirestore.instance.collection('clients');
+
+    // Fetch all documents from the collection
+    QuerySnapshot querySnapshot = await collection.get();
+
+    // Initialize a list to hold the maps
+    List<Institution> dataList = [];
+
+    // Iterate through each document in the collection
+    for (QueryDocumentSnapshot document in querySnapshot.docs) {
+      // Get the data as a map
+      if (document.id != 'default') {
+        Institution dataMap = await rawInstitutionData(document.id);
 
         // Add the map to the list
         dataList.add(dataMap);

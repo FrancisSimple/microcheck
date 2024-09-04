@@ -36,8 +36,7 @@ class _ClientPageState extends State<ClientPage> {
 
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider =
-        Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
 
     //filteredRecords = await fetchInstitutionDataAsList(currentInst!.uid);
@@ -69,8 +68,7 @@ class _ClientPageState extends State<ClientPage> {
             ),
             SizedBox(height: 16.0),
             Expanded(
-              child: buildClientTable(
-                  context, filteredRecords, currentInst!, instProvider),
+              child: buildClientTable(context, filteredRecords, currentInst!, instProvider),
             ),
           ],
         ),
@@ -88,7 +86,7 @@ class _ClientPageState extends State<ClientPage> {
           );
           // Navigator.of(context).pop();
         },
-        tooltip: 'Add Applicant',
+        tooltip: 'Add Person',
         child: Icon(
           Icons.person_add,
           // color: Colors.amber,
@@ -109,7 +107,7 @@ class _ClientPageState extends State<ClientPage> {
             DataColumn(label: Text('Ghana Card Number')),
             DataColumn(label: Center(child: Text('Status'))),
             DataColumn(label: Text('Last Updated')),
-            DataColumn(label: Text('')),
+            DataColumn(label: Text('Edit options')),
           ],
           rows: List<DataRow>.generate(
             records.length,
@@ -123,8 +121,7 @@ class _ClientPageState extends State<ClientPage> {
                   ElevatedButton(
                     onPressed: () {
                       // loadingDialog(context);
-                      _showEditClientDialog(
-                          context, records[index], inst, instProvider);
+                      _showEditClientDialog(context, records[index], inst, instProvider);
                       // Navigator.of(context).pop();
                     },
                     child: Text(
@@ -151,8 +148,7 @@ class _ClientPageState extends State<ClientPage> {
     });
   }
 
-  void _showEditClientDialog(BuildContext context, Client client,
-      Institution inst, InstitutionProvider instProvider) {
+  void _showEditClientDialog(BuildContext context, Client client,Institution inst, InstitutionProvider instProvider) {
     final formKey = GlobalKey<FormState>();
     final TextEditingController nameController =
         TextEditingController(text: client.name);
@@ -167,7 +163,7 @@ class _ClientPageState extends State<ClientPage> {
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
-            'Update Client Info',
+            'Update Person Info',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           content: SingleChildScrollView(
@@ -181,12 +177,12 @@ class _ClientPageState extends State<ClientPage> {
                     Icons.person,
                     controller: nameController,
                   ),
-                  SizedBox(height: 10),
-                  buildTextFormField(
-                    'Ghana Card Number',
-                    Icons.payment_rounded,
-                    controller: ghanaCardController,
-                  ),
+                  // SizedBox(height: 10),
+                  // buildTextFormField(
+                  //   'Ghana Card Number',
+                  //   Icons.payment_rounded,
+                  //   controller: ghanaCardController,
+                  // ),
                   SizedBox(height: 20),
                   DropdownButtonFormField<String>(
                     value: selectedStatus,
@@ -245,21 +241,23 @@ class _ClientPageState extends State<ClientPage> {
             ElevatedButton(
               child: Text('Update'),
               onPressed: () async {
-                loadingDialog(context);
+                
                 if (formKey.currentState!.validate()) {
+                  loadingDialog(context);
                   setState(() {
                     client.name = nameController.text.trim();
-                    client.cardNumber = ghanaCardController.text.trim();
+                    //client.cardNumber = ghanaCardController.text.trim();
                     client.status = selectedStatus!;
-                    buildClientTable(
-                        context, filteredRecords, inst, instProvider);
+                    client.lastUpdated = DateTime.now().toString();
+                    inst.replaceClient(client);
+                    instProvider.setCurrentInstitution(inst);
+                    buildClientTable(context, filteredRecords, inst, instProvider);
                   });
-                  await addInstToClient(
-                      client.cardNumber, widget.uid, selectedStatus!);
+                  await addInstToClient(client.cardNumber, widget.uid, selectedStatus!,name: client.name);
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
 
-                  await fetchInstitutionData(widget.uid, instProvider);
+                  //await fetchInstitutionData(widget.uid, instProvider);
                 }
               },
             ),
