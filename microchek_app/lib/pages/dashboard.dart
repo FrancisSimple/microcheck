@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/drawer.dart';
+import 'package:microchek_app/utils/form.dart';
 import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
-
 
 class GhanaCardValidationPage extends StatefulWidget {
   const GhanaCardValidationPage({super.key});
@@ -25,32 +25,203 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   bool _isFound = false;
   bool _isCleared = false;
   Client? thisClient;
- 
 
+  @override
+  Widget build(BuildContext context) {
+    InstitutionProvider instProvider =
+        Provider.of<InstitutionProvider>(context, listen: true);
+    final currentInst = instProvider.currentInstitution;
+    //fetchInstitutionData(currentInst!.uid, instProvider);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Background Check'),
+        centerTitle: true,
+      ),
+      drawer: SampleDrawer(),
+      body: Padding(
+        padding: const EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          bottom: 16,
+        ),
+        child: Center(
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUnfocus,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    controller: _ghanaCardController,
+                    keyboardType: TextInputType.text,
+                    maxLength: 15,
+                    inputFormatters: [
+                      GhanaCardNumberFormatter(),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: 'Ghana Card Number',
+                      hintText: 'GHA-000000000-0',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter the Ghana Card Number';
+                      } else if (!isValidGhanaCardNumber(value)) {
+                        return 'Invalid Ghana Card Number';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 50),
+                  ElevatedButton(
+                    onPressed: validateGhanaCard,
+                    child: Text('Check'),
+                  ),
+                  // if (_isValid)
+                  //   Padding(
+                  //     padding: const EdgeInsets.only(top: 20.0),
+                  //     child: Text(
+                  //       _isFound
+                  //           ? 'Existing Records Found!'
+                  //           : 'No Existing Records!',
+                  //       style: TextStyle(
+                  //         color: _isFound ? Colors.red : Colors.green,
+                  //         fontSize: 16,
+                  //       ),
+                  //     ),
+                  //   ),
+                  //
+                  if (_isCleared && _isValid)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Text("Applicant is Cleared"),
+                    )
+                  else
+                    Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: !_isValid
+                            ? Text("")
+                            : Text(
+                                'Applicant is Not Cleared!',
+                                style: TextStyle(
+                                  color:
+                                      !_isCleared ? Colors.red : Colors.green,
+                                  fontSize: 16,
+                                ),
+                              )),
+                  if (_isCleared && _isValid)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text("Are you considering this person?"),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  
+                                },
+                                child: Text(
+                                  'Yes',
+                                  style: TextStyle(color: Colors.green),
+                                ),
+                              ),
+                              // SizedBox(
+                              //   height: 30,
+                              // ),
+                              // ElevatedButton(
+                              //   onPressed: () async {},
+                              //   child: Text('No',
+                              //       style: TextStyle(color: Colors.red)),
+                              // ),
+                              SizedBox(),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  if (_isFound && _isValid && !_isCleared)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          //loadingDialog(context);
+                          _showCompanyDetails(
+                              context, thisClient!.allInstitutions!);
+                          //Navigator.of(context).pop();
+                          //Navigator.of(context).pop();
+                        },
+                        child: Text('View Company Details'),
+                      ),
+                    ),
+                  if (!_isFound && _isValid)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // loadingDialog(context);
+                          showAddUserForm(context, currentInst!, instProvider,
+                              controllerText: _ghanaCardController.text);
+                          // Navigator.of(context).pop();
+                        },
+                        child: Text('Add Applicant'),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Implement the functionality to add a user to the system here
 
+          showAddUserForm(context, currentInst!, instProvider,
+              controllerText: _ghanaCardController.text, autofill: true);
+          // Navigator.of(context).pop();
+        },
+        tooltip: 'Add Applicant',
+        child: Icon(
+          Icons.person_add,
+          // color: Colors.amber,
+        ),
+      ),
+    );
+  }
 
-  void _validateGhanaCard() async {
+  bool isValidGhanaCardNumber(String number) {
+    // Implement your validation logic here.
+    String pattern = r'GHA-\d{9}-\d{1}$';
+    RegExp regExp = RegExp(pattern);
+    return regExp.hasMatch(number);
+  }
+
+  void validateGhanaCard() async {
     if (_formKey.currentState?.validate() ?? false) {
-
       loadingDialog(context);
       _isValid = true;
       _isFound = await checkClientExists(_ghanaCardController.text);
       if (_isFound) {
         thisClient = await fetchClientData(_ghanaCardController.text);
-        //clientList = thisClient!.allInstitutions;        
+        //clientList = thisClient!.allInstitutions;
         if (thisClient != null) {
           _isCleared = true;
-          for(Institution inst in thisClient!.allInstitutions!){
-            if (inst.status != "Clear"){
+          for (Institution inst in thisClient!.allInstitutions!) {
+            if (inst.status != "Clear") {
               _isCleared = false;
               break;
             }
           }
-          
-        } 
-
-      } 
-      else {
+        }
+      } else {
         _isCleared = true;
       }
       setState(() {
@@ -59,8 +230,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         _isCleared = _isCleared;
       });
       Navigator.of(context).pop();
-    } 
-    else {
+    } else {
       setState(() {
         _isValid = false;
         _isFound = false;
@@ -214,175 +384,6 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
     );
   }
 
-  void _showAddUserForm(BuildContext context, String ghanaCardNumber,
-      Institution institution, InstitutionProvider instProvider) {
-    // loadingDialog(context);
-    final formKey = GlobalKey<FormState>();
-    final TextEditingController nameController = TextEditingController();
-    // final TextEditingController emailController = TextEditingController();
-    final TextEditingController ghanaCardController = TextEditingController(
-        text: ghanaCardNumber); // Pre-fill Ghana Card Number
-    final TextEditingController phoneController = TextEditingController();
-    String? selectedStatus; // Variable to store the selected dropdown value
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            'Add Applicant',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          content: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _buildTextFormField(
-                    'Name',
-                    Icons.person,
-                    controller: nameController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a name';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  // _buildTextFormField(
-                  //   'Email',
-                  //   Icons.email,
-                  //   controller: emailController,
-                  //   validator: (value) {
-                  //     if (value == null || value.isEmpty) {
-                  //       return 'Please enter an email';
-                  //     } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
-                  //         .hasMatch(value)) {
-                  //       return 'Please enter a valid email address';
-                  //     }
-                  //     return null;
-                  //   },
-                  // ),
-                  SizedBox(height: 10),
-                  _buildTextFormField(
-                    'Phone Number',
-                    Icons.phone,
-                    controller: phoneController,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a phone number';
-                      } else if (value.length < 10) {
-                        return 'Phone number must be at least 10 digits';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 10),
-                  _buildTextFormField(
-                    'Ghana Card Number',
-                    Icons.payment_rounded,
-                    controller: ghanaCardController,
-                    enabled:
-                        false, // Keep this field disabled as it's auto-filled
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a Ghana Card Number';
-                      } else if (!_isValidGhanaCardNumber(value)) {
-                        return 'Invalid Ghana Card Number';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 20),
-                  DropdownButtonFormField<String>(
-                    value: selectedStatus,
-                    decoration: InputDecoration(
-                      labelText: 'Application Status',
-                      prefixIcon: Icon(
-                        Icons.assignment,
-                        color: Colors.amber,
-                      ),
-                      filled: true,
-                      // fillColor: Colors.grey[200],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    items: ['Consider Application', 'Approve Application']
-                        .map((String status) {
-                      return DropdownMenuItem<String>(
-                        value: status,
-                        child: Text(
-                          status,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (newValue) {
-                      setState(() {
-                        selectedStatus = newValue;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select an application status';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: Colors.redAccent),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text('Add Applicant'),
-              onPressed: () async {
-                if (formKey.currentState?.validate() ?? false) {
-                  // Implement the logic to add the user to the system here
-                  loadingDialog(context);
-                  await addInstToClient(_ghanaCardController.text.trim(),
-                      institution.uid, selectedStatus!,
-                      name: nameController.text.trim(),
-                      contact: phoneController.text.trim());
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Client added Successfully')),
-                  );
-                  Navigator.of(context).pop(); // Close the dialog after adding
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-    if (!_isFound && _isValid) {
-      Padding(
-        padding: const EdgeInsets.only(top: 20.0),
-        child: ElevatedButton(
-          onPressed: () {
-            _showAddUserForm(
-                context, ghanaCardController.text, institution, instProvider);
-          },
-          child: Text('Add Applicant'),
-        ),
-      );
-    }
-  }
-
 // Replace the existing _showAddUserForm call with the new one
 
   Widget _buildTextFormField(
@@ -416,241 +417,9 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
     _ghanaCardController.dispose();
     super.dispose();
   }
-
-  @override
-  Widget build(BuildContext context) {
-    InstitutionProvider instProvider =
-        Provider.of<InstitutionProvider>(context, listen: true);
-    final currentInst = instProvider.currentInstitution;
-    //fetchInstitutionData(currentInst!.uid, instProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Applicant Validation'),
-        centerTitle: true,
-      ),
-      drawer: SampleDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.only(
-          left: 16.0,
-          right: 16.0,
-          bottom: 16,
-        ),
-        child: Center(
-          child: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUnfocus,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextFormField(
-                    controller: _ghanaCardController,
-                    keyboardType: TextInputType.text,
-                    maxLength: 15,
-                    inputFormatters: [
-                      GhanaCardNumberFormatter(),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: 'Ghana Card Number',
-                      hintText: 'GHA-000000000-0',
-                      border: OutlineInputBorder(),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter the Ghana Card Number';
-                      } else if (!_isValidGhanaCardNumber(value)) {
-                        return 'Invalid Ghana Card Number';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 50),
-                  ElevatedButton(
-                    onPressed: _validateGhanaCard,
-                    child: Text('Validate'),
-                  ),
-                  if (_isValid)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: Text(
-                        _isFound
-                            ? 'Existing Records Found!'
-                            : 'No Existing Records!',
-                        style: TextStyle(
-                          color: _isFound ? Colors.red : Colors.green,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  if (_isCleared && _isValid)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: Text(
-                        'Applicant is Cleared!',
-                        style: TextStyle(
-                          color: Colors.green,
-                          fontSize: 16,
-                        ),
-                      ),
-                    )
-                  else
-                    Padding(
-                        padding: const EdgeInsets.only(top: 20.0),
-                        child: !_isValid
-                            ? Text("")
-                            : Text(
-                                'Applicant is Not Cleared!',
-                                style: TextStyle(
-                                  color:
-                                      !_isCleared ? Colors.red : Colors.green,
-                                  fontSize: 16,
-                                ),
-                              )),
-                  if (_isCleared && _isFound && _isValid)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          // _showCompanyDetails(context);
-                          loadingDialog(context);
-
-                          await addInstToClient(_ghanaCardController.text.trim(),currentInst!.uid, 'Consider Application');
-                          Navigator.of(context).pop();
-                          //Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Application put under consideration')),
-                          );
-                          final list = await fetchClientDataAsList(currentInst.uid);
-                          setState(() {
-                            currentInst.allClients = list;
-                          });
-                          await fetchInstitutionData(currentInst.uid, instProvider);
-                        },
-                        child: Text('Consider Application'),
-                      ),
-                    ),
-                  if (_isCleared && _isFound && _isValid)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: ElevatedButton(
-                        onPressed: () async{
-                          loadingDialog(context);
-                          // _showCompanyDetails(context);
-                          await addInstToClient(_ghanaCardController.text.trim(),
-                              currentInst!.uid, 'Approve Application');
-                          Navigator.of(context).pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Application approved')),
-                          );
-                          setState(() {
-                          });
-                          await fetchInstitutionData(currentInst.uid, instProvider);
-                        },
-                        child: Text('Approve Application'),
-                      ),
-                    ),
-                  if (_isFound && _isValid && !_isCleared)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          //loadingDialog(context);
-                          _showCompanyDetails(context, thisClient!.allInstitutions!);
-                          //Navigator.of(context).pop();
-                          //Navigator.of(context).pop();
-                        },
-                        child: Text('View Company Details'),
-                      ),
-                    ),
-                  if (!_isFound && _isValid)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // loadingDialog(context);
-                          _showAddUserForm(context, _ghanaCardController.text,
-                              currentInst!, instProvider);
-                          // Navigator.of(context).pop();
-                        },
-                        child: Text('Add Applicant'),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Implement the functionality to add a user to the system here
-
-          _showAddUserForm(
-              context, _ghanaCardController.text, currentInst!, instProvider);
-          // Navigator.of(context).pop();
-        },
-        tooltip: 'Add Applicant',
-        child: Icon(
-          Icons.person_add,
-          // color: Colors.amber,
-        ),
-      ),
-    );
-  }
-
-  bool _isValidGhanaCardNumber(String number) {
-    // Implement your validation logic here.
-    String pattern = r'GHA-\d{9}-\d{1}$';
-    RegExp regExp = RegExp(pattern);
-    return regExp.hasMatch(number);
-  }
 }
 
 // Formats the input with hyphens
-class GhanaCardNumberFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, // Unused.
-    TextEditingValue newValue, // New text
-  ) {
-    final newTextLength = newValue.text.length;
-    int selectionIndex = newValue.selection.end;
-    // int usedSubstringIndex = 0;
-    final formattedString = StringBuffer();
-
-    // Add the prefix "GHA-" to the formatted string
-    formattedString.write('GHA-');
-
-    // Remove the prefix "GHA-" from the new value
-    String newNumberValue = '';
-    if (newTextLength >= 4) {
-      newNumberValue = newValue.text.substring(4);
-    }
-
-    // Remove all non-digit characters from the new value
-    newNumberValue = newNumberValue.replaceAll(RegExp(r'[^0-9]'), '');
-
-    // Add the formatted number to the formatted string
-    if (newNumberValue.length < 9) {
-      formattedString.write(newNumberValue);
-    } else {
-      formattedString.write('${newNumberValue.substring(0, 9)}-');
-      if (newNumberValue.length > 9) {
-        formattedString.write(newNumberValue.substring(9));
-      }
-    }
-
-    // Used for setting cursor position
-    selectionIndex = formattedString.length;
-
-    return TextEditingValue(
-      text: formattedString.toString(),
-      selection: TextSelection.collapsed(offset: selectionIndex),
-    );
-  }
-}
 
 // Function to fetch data and create a list of string maps
 
