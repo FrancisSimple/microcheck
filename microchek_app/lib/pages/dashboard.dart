@@ -57,6 +57,9 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     controller: _ghanaCardController,
                     keyboardType: TextInputType.text,
                     maxLength: 15,
+                    onChanged: (value) {
+                      debugPrint(_ghanaCardController.text);
+                    },
                     inputFormatters: [
                       GhanaCardNumberFormatter(),
                     ],
@@ -127,7 +130,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                   catch(e){
                                     debugPrint('error message here: $e');
                                   }                           
-                                  
+                                   _ghanaCardController.clear();
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text('You are in. Fetching your data...')),
                                     );
@@ -157,39 +160,13 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                         child: Text('View Institution Details'),
                       ),
                     ),
-                  // if (!_isFound && _isValid)
-                  //   Padding(
-                  //     padding: const EdgeInsets.only(top: 20.0),
-                  //     child: ElevatedButton(
-                  //       onPressed: () {
-                  //         // loadingDialog(context);
-                  //         showAddUserForm(context, currentInst!, instProvider,
-                  //             controllerText: _ghanaCardController.text);
-                  //         // Navigator.of(context).pop();
-                  //       },
-                  //       child: Text('Add Applicant'),
-                  //     ),
-                  //   ),
+
                 ],
               ),
             ),
           ),
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     // Implement the functionality to add a user to the system here
-
-      //     showAddUserForm(context, currentInst!, instProvider,
-      //         controllerText: _ghanaCardController.text, autofill: true);
-      //     // Navigator.of(context).pop();
-      //   },
-      //   tooltip: 'Add Applicant',
-      //   child: Icon(
-      //     Icons.person_add,
-      //     // color: Colors.amber,
-      //   ),
-      // ),
     );
   }
 
@@ -204,6 +181,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   if (_formKey.currentState?.validate() ?? false) {
     loadingDialog(context);
     _isValid = true;
+    debugPrint(_ghanaCardController.text);
 
     // Step 1: Check if the Ghana Card is in the database
     for (Client client in inst.databaseClients!) {
@@ -212,8 +190,12 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         _isFound = true;
         thisClient = client;
         debugPrint('Client found in database.');
+         _ghanaCardController.clear();
         break;
       }
+      setState(() {
+        _isFound = false;
+      });
     }
 
     if (_isFound) {
@@ -224,9 +206,10 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         if (client2.cardNumber == thisClient!.cardNumber) {
           debugPrint('client matches: ${client2.cardNumber} and ${inst.uid}');
           thisClient = await fetchDirectClientData(client2.cardNumber, inst.uid);
+           _ghanaCardController.clear();
           debugPrint('fetched direct client');
             for (Institution inst in thisClient!.allInstitutions!) {
-              debugPrint('enterd the loop for all institutions of this new client fetched');
+              debugPrint('entered the loop for all institutions of this new client fetched');
               if (inst.status != "Clear") {
                 _isCleared = false;
                 debugPrint('clear data updated');
@@ -260,6 +243,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
       _isCleared = false;
     });
   }
+  _ghanaCardController.clear();
 }
 
 
