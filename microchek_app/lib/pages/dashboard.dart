@@ -28,7 +28,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider =
+        Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
     //fetchInstitutionData(currentInst!.uid, instProvider);
     return Scaffold(
@@ -79,12 +80,11 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   ),
                   SizedBox(height: 50),
                   ElevatedButton(
-                    onPressed: (){
+                    onPressed: () {
                       validateGhanaCard(currentInst!);
-                      },
+                    },
                     child: Text('Check'),
                   ),
-
                   if (_isCleared && _isValid)
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
@@ -103,7 +103,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                   fontSize: 16,
                                 ),
                               )),
-                  if ((_isCleared && _isValid) || (!_isFound && _isValid && _isCleared))
+                  if ((_isCleared && _isValid) ||
+                      (!_isFound && _isValid && _isCleared))
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
                       child: Column(
@@ -118,29 +119,67 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                               ElevatedButton(
                                 onPressed: () async {
                                   loadingDialog(context);
-                                  try{
-                                    await addInstToClient(_ghanaCardController.text.trim(), currentInst!.uid, 'Under Consideration');
-                                    Navigator.pop(context);
-                                    Client client = await fetchClientData(_ghanaCardController.text.trim());
-                                    setState(() {
-                                      currentInst.replaceClient(client);                                      
-                                  });
-                                  instProvider.setCurrentInstitution(currentInst);
-                                  }
-                                  catch(e){
-                                    debugPrint('error message here: $e');
-                                  }                           
-                                   _ghanaCardController.clear();
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('You are in. Fetching your data...')),
-                                    );
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Considering Person'),
+                                          content: Text(
+                                              'We are adding this person to the system. You can edit later?'),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('No')),
+                                            TextButton(
+                                                onPressed: () async {
+                                                  loadingDialog(context);
+                                                  try {
+                                                    await addInstToClient(
+                                                        _ghanaCardController
+                                                            .text
+                                                            .trim(),
+                                                        currentInst!.uid,
+                                                        'Under Consideration');
+
+                                                    Client client =
+                                                        await fetchClientData(
+                                                            _ghanaCardController
+                                                                .text
+                                                                .trim());
+                                                    setState(() {
+                                                      currentInst.replaceClient(
+                                                          client);
+                                                    });
+                                                    instProvider
+                                                        .setCurrentInstitution(
+                                                            currentInst);
+                                                  } catch (e) {
+                                                    debugPrint(
+                                                        'error message here: $e');
+                                                  }
+                                                  Navigator.pop(context);
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                        content: Text(
+                                                            'You are in. Fetching your data...')),
+                                                  );
+                                                  Navigator.pop(context);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('Yes')),
+                                          ],
+                                        );
+                                      });
                                 },
                                 child: Text(
                                   'Yes',
                                   style: TextStyle(color: Colors.green),
                                 ),
                               ),
-
                               SizedBox(),
                             ],
                           )
@@ -153,14 +192,14 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                       child: ElevatedButton(
                         onPressed: () async {
                           //loadingDialog(context);
-                          _showCompanyDetails(context, thisClient!.allInstitutions!);
+                          _showCompanyDetails(
+                              context, thisClient!.allInstitutions!);
                           //Navigator.of(context).pop();
                           //Navigator.of(context).pop();
                         },
                         child: Text('View Institution Details'),
                       ),
                     ),
-
                 ],
               ),
             ),
@@ -178,74 +217,73 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   }
 
   void validateGhanaCard(Institution inst) async {
-  if (_formKey.currentState?.validate() ?? false) {
-    loadingDialog(context);
-    _isValid = true;
-    debugPrint(_ghanaCardController.text);
+    if (_formKey.currentState?.validate() ?? false) {
+      loadingDialog(context);
+      _isValid = true;
+      debugPrint(_ghanaCardController.text);
 
-    // Step 1: Check if the Ghana Card is in the database
-    for (Client client in inst.databaseClients!) {
-      
-      if (client.cardNumber == _ghanaCardController.text.trim()) {
-        _isFound = true;
-        thisClient = client;
-        debugPrint('Client found in database.');
-         _ghanaCardController.clear();
-        break;
+      // Step 1: Check if the Ghana Card is in the database
+      for (Client client in inst.databaseClients!) {
+        if (client.cardNumber == _ghanaCardController.text.trim()) {
+          _isFound = true;
+          thisClient = client;
+          debugPrint('Client found in database.');
+          //  _ghanaCardController.clear();
+          break;
+        }
+        setState(() {
+          _isFound = false;
+        });
       }
-      setState(() {
-        _isFound = false;
-      });
-    }
 
-    if (_isFound) {
-      _isCleared = true;
+      if (_isFound) {
+        _isCleared = true;
 
-      // Step 2: Check if this client has been cleared
-      for (Client client2 in inst.allClients!) {
-        if (client2.cardNumber == thisClient!.cardNumber) {
-          debugPrint('client matches: ${client2.cardNumber} and ${inst.uid}');
-          thisClient = await fetchDirectClientData(client2.cardNumber, inst.uid);
-           _ghanaCardController.clear();
-          debugPrint('fetched direct client');
+        // Step 2: Check if this client has been cleared
+        for (Client client2 in inst.allClients!) {
+          if (client2.cardNumber == thisClient!.cardNumber) {
+            debugPrint('client matches: ${client2.cardNumber} and ${inst.uid}');
+            thisClient =
+                await fetchDirectClientData(client2.cardNumber, inst.uid);
+            //  _ghanaCardController.clear();
+            debugPrint('fetched direct client');
             for (Institution inst in thisClient!.allInstitutions!) {
-              debugPrint('entered the loop for all institutions of this new client fetched');
+              debugPrint(
+                  'entered the loop for all institutions of this new client fetched');
               if (inst.status != "Clear") {
                 _isCleared = false;
                 debugPrint('clear data updated');
                 break;
               }
             }
-          
 
-          break;
+            break;
+          }
         }
+
+        // Additional debug info
+        debugPrint('Client clearance status: $_isCleared');
+      } else {
+        _isCleared = true; // No record means no issues found
       }
 
-      // Additional debug info
-      debugPrint('Client clearance status: $_isCleared');
+      // Update UI
+      setState(() {
+        _isValid = _isValid;
+        _isFound = _isFound;
+        _isCleared = _isCleared;
+      });
+
+      Navigator.of(context).pop(); // Close loading dialog
     } else {
-      _isCleared = true; // No record means no issues found
+      setState(() {
+        _isValid = false;
+        _isFound = false;
+        _isCleared = false;
+      });
     }
-
-    // Update UI
-    setState(() {
-      _isValid = _isValid;
-      _isFound = _isFound;
-      _isCleared = _isCleared;
-    });
-
-    Navigator.of(context).pop(); // Close loading dialog
-  } else {
-    setState(() {
-      _isValid = false;
-      _isFound = false;
-      _isCleared = false;
-    });
+    // _ghanaCardController.clear();
   }
-  _ghanaCardController.clear();
-}
-
 
   // bool _checkIfUserExists(String cardNumber) {
   //   return cardNumber == "GHA-123456789-0"; // Example Ghana Card number
@@ -499,11 +537,11 @@ Future<List<Client>> fetchClientDataAsList(String instId) async {
   }
 }
 
-
 Future<List<Client>> fetchAllClientDataAsList() async {
   try {
     // Get a reference to the Firestore collection
-    CollectionReference collection = FirebaseFirestore.instance.collection('clients');
+    CollectionReference collection =
+        FirebaseFirestore.instance.collection('clients');
 
     // Fetch all documents from the collection
     QuerySnapshot querySnapshot = await collection.get();
@@ -534,7 +572,8 @@ Future<List<Client>> fetchAllClientDataAsList() async {
 Future<List<Institution>> fetchAllInstitutionsDataAsList() async {
   try {
     // Get a reference to the Firestore collection
-    CollectionReference collection = FirebaseFirestore.instance.collection('clients');
+    CollectionReference collection =
+        FirebaseFirestore.instance.collection('clients');
 
     // Fetch all documents from the collection
     QuerySnapshot querySnapshot = await collection.get();
