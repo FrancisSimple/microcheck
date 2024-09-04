@@ -16,7 +16,7 @@ Widget buildTextFormField(
 }) {
   return TextFormField(
     controller: controller,
-    enabled: autofill! ? false : true,
+    enabled: autofill ? false : true,
     decoration: InputDecoration(
       labelText: label,
       prefixIcon: Icon(
@@ -271,7 +271,7 @@ void showAddUserForm(
                   },
                   autofill: autofill,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: ghanaCardController,
                   keyboardType: TextInputType.text,
@@ -283,7 +283,7 @@ void showAddUserForm(
                   decoration: InputDecoration(
                     labelText: 'Ghana Card Number',
                     hintText: 'GHA-000000000-0',
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.credit_card,
                       color: Colors.amber,
                     ),
@@ -379,7 +379,12 @@ void showAddUserForm(
 
 // Profile Page Edit Popup
 class EditProfilePopup extends StatefulWidget {
-  const EditProfilePopup({super.key});
+  const EditProfilePopup({
+    super.key,
+    required this.currentInst,
+  });
+
+  final Institution currentInst;
 
   @override
   State<EditProfilePopup> createState() => _EditProfilePopupState();
@@ -392,6 +397,17 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
   final TextEditingController emailController = TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Set the initial values of the controllers
+    nameController.text = widget.currentInst.name;
+    locationController.text = widget.currentInst.location;
+    contactController.text = widget.currentInst.contact;
+    emailController.text = widget.currentInst.email;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -415,6 +431,7 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
                 controller: nameController,
                 icon: Icons.business,
                 label: 'Institution Name',
+
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the institution name';
@@ -460,6 +477,7 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
                 icon: Icons.email,
                 label: 'Email',
                 keyboardType: TextInputType.emailAddress,
+                enabled: false,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the email';
@@ -516,6 +534,7 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
     required TextEditingController controller,
     required IconData icon,
     required String label,
+    bool enabled = true,
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
@@ -524,6 +543,7 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
+      enabled: enabled,
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: Colors.amber),
         labelText: label,

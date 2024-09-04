@@ -2,7 +2,6 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/user_configure.dart';
 // import 'package:flutter/material.dart';
 import 'package:microchek_app/utils/drawer.dart';

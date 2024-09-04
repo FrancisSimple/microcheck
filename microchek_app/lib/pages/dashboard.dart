@@ -3,7 +3,6 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/drawer.dart';
 import 'package:microchek_app/utils/form.dart';
@@ -84,7 +83,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                     },
                     child: Text('Check'),
                   ),
-                  if ((_isFound && _isCleared && _isValid) ||(_isValid && isWithMe && _isCleared) || (!_isFound && _isValid))
+                  if ((_isFound && _isCleared && _isValid) ||(_isValid && isWithMe && _isCleared) || (!_isFound && !isWithMe && _isValid))
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
                       child: Text("Person is clear"),
@@ -102,7 +101,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                   fontSize: 16,
                                 ),
                               )),
-                  if ((_isFound && _isCleared && _isValid) ||(_isValid && isWithMe && _isCleared)|| (!_isFound && _isValid))
+                  if ((_isFound && _isCleared && _isValid) ||(_isValid && isWithMe && _isCleared)|| (!_isFound && !isWithMe && _isValid))
                     Padding(
                       padding: const EdgeInsets.only(top: 20.0),
                       child: Column(
@@ -117,6 +116,10 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                               ElevatedButton(
                                 onPressed: () async {
                                   loadingDialog(context);
+                                  debugPrint("Clear: $_isCleared");
+                                  debugPrint("found: $_isFound");
+                                  debugPrint("valid: $_isValid");
+                                  debugPrint("withme: $isWithMe");
                                   showDialog(
                                       context: context,
                                       builder: (BuildContext context) {

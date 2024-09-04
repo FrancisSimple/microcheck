@@ -2,11 +2,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/drawer.dart';
 import 'package:microchek_app/utils/form.dart';
-import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
 
 class MyMicroPage extends StatefulWidget {
@@ -78,7 +76,7 @@ class _MyMicroPageState extends State<MyMicroPage> {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return EditProfilePopup();
+                              return EditProfilePopup(currentInst: currentInst,);
                             },
                           );
                           // Navigator.of(context).pop();
