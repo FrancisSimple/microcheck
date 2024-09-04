@@ -414,8 +414,7 @@ Future<Client> fetchClientData(String number) async {
 // Function to fetch client data
 Future<Client> fetchDirectClientData(String number, String instId) async {
   try {
-    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('institutions').doc(instId).collection('myclients').doc(number)
-        .get();
+    DocumentSnapshot userSnapshot = await FirebaseFirestore.instance.collection('institutions').doc(instId).collection('myclients').doc(number).get();
     debugPrint('snapshot obtained: ${userSnapshot.exists}');
 
     if (!userSnapshot.exists || userSnapshot.data() == null) {
@@ -461,60 +460,11 @@ Future<Client> fetchDirectClientData(String number, String instId) async {
 }
 
 
-// Function to update client data
-// Future<bool> updateClientData(Client client) async {
-//   try {
-//     await FirebaseFirestore.instance.collection('clients').doc(client.cardNumber).update(client.toJson());
+Future<void> updateInstitutionProfile(String uid, String name,String location,String contact) async {
+        await FirebaseFirestore.instance.collection('institutions').doc(uid).update({
+          'name': name,
+          'location':location,
+          'contact':contact
+        });
 
-//     // Update or add institutions in the client's institution collection
-//     // if (client.allInstitutions != null) {
-//     //   for (Institution inst in client.allInstitutions!) {
-//     //     Map<String, dynamic> institutionData = inst.toJson();
-//     //     final institutionCollection = FirebaseFirestore.instance.collection('clients').doc(client.cardNumber).collection('myinstitutions');
-//     //     final document = await institutionCollection.doc(inst.uid).get();
-
-//     //     if (document.exists) {
-//     //       await institutionCollection.doc(inst.uid).update(institutionData);
-//     //     } else {
-//     //       await institutionCollection.doc(inst.uid).set(institutionData);
-//     //     }
-//     //   }
-//     // }
-
-//     return true;
-//   } catch (e, stacktrace) {
-//     debugPrint('Failed to update client data due to: $e');
-//     debugPrint('Stack trace: $stacktrace');
-//     return false;
-//   }
-// }
-
-
-// // Function to update institution data
-// Future<bool> updateInstitutionData(String uid, InstitutionProvider instProvider) async {
-//   try {
-//     Institution currentInstitution = await fetchInstitutionData(uid, instProvider);
-//     await FirebaseFirestore.instance.collection('institutions').doc(uid).update(currentInstitution.toJson());
-
-//     // Update or add clients in the institution's client collection
-//     if (currentInstitution.allClients != null) {
-//       for (Client client in currentInstitution.allClients!) {
-//         Map<String, dynamic> clientData = client.toJson();
-//         final clientCollection = FirebaseFirestore.instance.collection('institutions').doc(uid).collection('myclients');
-//         final document = await clientCollection.doc(client.cardNumber).get();
-
-//         if (document.exists) {
-//           await clientCollection.doc(client.cardNumber).update(clientData);
-//         } else {
-//           await clientCollection.doc(client.cardNumber).set(clientData);
-//         }
-//       }
-//     }
-
-//     return true;
-//   } catch (e) {
-//     debugPrint('Failed to update institution data due to: $e');
-//     return false;
-//   }
-// }
-
+}

@@ -76,9 +76,16 @@ class _MyMicroPageState extends State<MyMicroPage> {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return EditProfilePopup(currentInst: currentInst,);
+                              return EditProfilePopup(currentInst: currentInst,instPro: instProvider,);
                             },
                           );
+                          setState(() {
+
+                            currentInst.name = instProvider.currentInstitution!.name;
+                            currentInst.location = instProvider.currentInstitution!.location;
+                            currentInst.contact = instProvider.currentInstitution!.contact;
+                          });
+                          instProvider.setCurrentInstitution(currentInst);
                           // Navigator.of(context).pop();
                         },
                         icon: Icon(

@@ -84,6 +84,10 @@ class _ClientPageState extends State<ClientPage> {
             instProvider,
             autofill: false,
           );
+          setState(() {
+            
+          });
+          instProvider.setCurrentInstitution(currentInst);
           // Navigator.of(context).pop();
         },
         tooltip: 'Add Person',
