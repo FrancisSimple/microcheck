@@ -88,66 +88,70 @@ class _OnboardingPageState extends State<OnboardingPage> {
           right: 16.0,
           // bottom: 16,
         ),
-        child: ListView(
-          children: [
-            Text(
-              'Setup Your Institution',
-              style: Theme.of(context).textTheme.displaySmall,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: Form(
-                key: _formKey,
-                autovalidateMode: AutovalidateMode.onUnfocus,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildTextFormField(
-                      labelText: 'Institution Name',
-                      controller: _nameController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter the institution name';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    _buildTextFormField(
-                      labelText: 'Location',
-                      controller: _locationController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter the location';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    _buildTextFormField(
-                      labelText: 'Contact',
-                      controller: _contactController,
-                      keyboardType: TextInputType.phone,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter the contact number';
-                        } else if (value.length < 10) {
-                          return 'Contact number must be at least 10 digits';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: _submitForm,
-                      child: Text('Submit'),
-                    ),
-                  ],
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Text(
+                  'Profile Setup',
+                  style: Theme.of(context).textTheme.displaySmall,
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20.0),
+                  child: Form(
+                    key: _formKey,
+                    autovalidateMode: AutovalidateMode.onUnfocus,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildTextFormField(
+                          labelText: 'Institution Name',
+                          controller: _nameController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter the institution name';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        _buildTextFormField(
+                          labelText: 'Location',
+                          controller: _locationController,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter the location';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 20),
+                        _buildTextFormField(
+                          labelText: 'Contact',
+                          controller: _contactController,
+                          keyboardType: TextInputType.phone,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter the contact number';
+                            } else if (value.length < 10) {
+                              return 'Contact number must be at least 10 digits';
+                            }
+                            return null;
+                          },
+                        ),
+                        SizedBox(height: 30),
+                        ElevatedButton(
+                          onPressed: _submitForm,
+                          child: Text('Submit'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );

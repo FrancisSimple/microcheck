@@ -63,7 +63,7 @@ class SampleDrawer extends StatelessWidget {
                   leading: Icon(Icons.home),
                   title: Center(
                       child: Text(
-                    'Applicant Validation',
+                    'Background Check',
                     style: Theme.of(context).textTheme.titleMedium,
                   )),
                   onTap: () {
@@ -78,7 +78,7 @@ class SampleDrawer extends StatelessWidget {
                   leading: Icon(Icons.groups_rounded),
                   title: Center(
                       child: Text(
-                    'Clients',
+                    'Persons',
                     style: Theme.of(context).textTheme.titleMedium,
                   )),
                   onTap: () async {
@@ -95,7 +95,7 @@ class SampleDrawer extends StatelessWidget {
                   leading: Icon(Icons.settings),
                   title: Center(
                       child: Text(
-                    'My Microfinance',
+                    'My Institution',
                     style: Theme.of(context).textTheme.titleMedium,
                   )),
                   onTap: () {
