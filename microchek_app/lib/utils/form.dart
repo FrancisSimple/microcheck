@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/loading.dart';
+import 'package:provider/provider.dart';
 
 // Update pop up form text fields
 Widget buildTextFormField(
@@ -356,18 +357,42 @@ void showAddUserForm(
             onPressed: () async {
               if (formKey.currentState?.validate() ?? false) {
                 loadingDialog(context);
-                await addInstToClient(
-                  ghanaCardController.text.trim(),
-                  institution.uid,
-                  selectedStatus!,
-                  name: nameController.text.trim(),
-                  contact: phoneController.text.trim(),
+                try {
+                  
+                  await addInstToClient(
+                      ghanaCardController
+                          .text
+                          .trim(),
+                      institution.uid,
+                      'Under Consideration',name: nameController.text.trim());
+                      
+                      //currentInst.replaceClient(client);
+                      
+                  
+                  Client client = await fetchDirectClientData(ghanaCardController.text.trim(),institution.uid);
+                  Navigator.pop(context);
+                  // setState(() {
+                  //   currentInst.replaceClient(
+                  //       client);
+                  // });
+                  
+                  
+                  instProvider.currentInstitution!.replaceClient(client);
+                  instProvider.setCurrentInstitution(institution);
+                  debugPrint('size after: ${institution.allClients!.length}');
+                } catch (e) {
+                  debugPrint(
+                      'error message here: $e');
+                }
+                
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(
+                  SnackBar(
+                      content: Text(
+                          'Person added successfully')),
                 );
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Client added Successfully')),
-                );
-                Navigator.of(context).pop(); // Close the dialog after adding
+                Navigator.pop(context);
+                Navigator.pop(context);
               }
             },
           ),
@@ -382,9 +407,11 @@ class EditProfilePopup extends StatefulWidget {
   const EditProfilePopup({
     super.key,
     required this.currentInst,
+    required this.instPro
   });
 
   final Institution currentInst;
+  final InstitutionProvider instPro;
 
   @override
   State<EditProfilePopup> createState() => _EditProfilePopupState();
@@ -494,24 +521,6 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
       actions: [
         ElevatedButton(
           onPressed: () {
-            if (_formKey.currentState!.validate()) {
-              // Save the profile changes
-              loadingDialog(context);
-              // Implement save profile functionality here
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          child: const Text('Save'),
-        ),
-        ElevatedButton(
-          onPressed: () {
             Navigator.of(context).pop();
           },
           style: ElevatedButton.styleFrom(
@@ -524,6 +533,32 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
             'Cancel',
             style: TextStyle(color: Colors.redAccent),
           ),
+        ),
+        ElevatedButton(
+          onPressed: () async{
+            if (_formKey.currentState!.validate()) {
+              // Save the profile changes
+              loadingDialog(context);
+              // Implement save profile functionality here
+              await updateInstitutionProfile(widget.currentInst.uid,nameController.text.trim(),locationController.text.trim(),contactController.text.trim());
+              Navigator.of(context).pop();
+              setState(() {
+              widget.currentInst.name = nameController.text.trim();
+              widget.currentInst.location = locationController.text.trim();
+              widget.currentInst.contact = contactController.text.trim();
+              });
+              widget.instPro.setCurrentInstitution(widget.currentInst);
+              
+              Navigator.of(context).pop();
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          child: const Text('Save Changes'),
         ),
       ],
     );
