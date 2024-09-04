@@ -256,21 +256,21 @@ void showAddUserForm(
                   },
                   autofill: autofill,
                 ),
-                const SizedBox(height: 10),
-                buildTextFormField(
-                  'Phone Number',
-                  Icons.phone,
-                  controller: phoneController,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a phone number';
-                    } else if (value.length < 10) {
-                      return 'Phone number must be at least 10 digits';
-                    }
-                    return null;
-                  },
-                  autofill: autofill,
-                ),
+                // const SizedBox(height: 10),
+                // buildTextFormField(
+                //   'Phone Number',
+                //   Icons.phone,
+                //   controller: phoneController,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return 'Please enter a phone number';
+                //     } else if (value.length < 10) {
+                //       return 'Phone number must be at least 10 digits';
+                //     }
+                //     return null;
+                //   },
+                //   autofill: autofill,
+                // ),
                 const SizedBox(height: 10),
                 TextFormField(
                   controller: ghanaCardController,
@@ -431,7 +431,6 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
                 controller: nameController,
                 icon: Icons.business,
                 label: 'Institution Name',
-
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the institution name';
@@ -495,21 +494,6 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
       actions: [
         ElevatedButton(
           onPressed: () {
-            Navigator.of(context).pop();
-          },
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          child: const Text(
-            'Cancel',
-            style: TextStyle(color: Colors.redAccent),
-          ),
-        ),
-        ElevatedButton(
-          onPressed: () {
             if (_formKey.currentState!.validate()) {
               // Save the profile changes
               loadingDialog(context);
@@ -524,7 +508,22 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
-          child: const Text('Save Changes'),
+          child: const Text('Save'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: Colors.redAccent),
+          ),
         ),
       ],
     );
