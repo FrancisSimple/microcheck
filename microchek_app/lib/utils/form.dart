@@ -379,17 +379,26 @@ void showAddUserForm(
 
 // Profile Page Edit Popup
 class EditProfilePopup extends StatefulWidget {
-  const EditProfilePopup({super.key});
+  const EditProfilePopup({
+    super.key,
+    required this.currentInst,
+  });
+  final Institution? currentInst;
 
   @override
   State<EditProfilePopup> createState() => _EditProfilePopupState();
 }
 
+
 class _EditProfilePopupState extends State<EditProfilePopup> {
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController locationController = TextEditingController();
-  final TextEditingController contactController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
+  
+ final currentInst = InstitutionProvider().currentInstitution;
+ late final TextEditingController nameController = TextEditingController();
+  late final TextEditingController locationController = TextEditingController();
+  late final TextEditingController contactController = TextEditingController();
+   late final TextEditingController emailController = TextEditingController();
+
+  // const dynamic? widget = null;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -459,6 +468,7 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
                 controller: emailController,
                 icon: Icons.email,
                 label: 'Email',
+                enabled: false,
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -519,11 +529,13 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
     TextInputType keyboardType = TextInputType.text,
     List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
+    bool enabled = true,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
+      enabled: enabled,
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: Colors.amber),
         labelText: label,

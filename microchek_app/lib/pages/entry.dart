@@ -78,7 +78,7 @@ class _MyMicroPageState extends State<MyMicroPage> {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return EditProfilePopup();
+                              return EditProfilePopup(currentInst: currentInst,);
                             },
                           );
                           // Navigator.of(context).pop();
