@@ -3,7 +3,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:microchek_app/pages/client.dart';
+import 'package:microchek_app/pages/entry.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/drawer.dart';
 import 'package:microchek_app/utils/form.dart';
@@ -14,7 +15,7 @@ class GhanaCardValidationPage extends StatefulWidget {
   const GhanaCardValidationPage({super.key});
 
   @override
-  _GhanaCardValidationPageState createState() =>
+  State<GhanaCardValidationPage> createState() =>
       _GhanaCardValidationPageState();
 }
 
@@ -77,6 +78,9 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   ),
                   SizedBox(height: 50),
                   ElevatedButton(
+                    style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                            Theme.of(context).colorScheme.primaryContainer)),
                     onPressed: validateGhanaCard,
                     child: Text('Check'),
                   ),
@@ -125,9 +129,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                             children: [
                               SizedBox(),
                               ElevatedButton(
-                                onPressed: () async {
-                                  
-                                },
+                                onPressed: () async {},
                                 child: Text(
                                   'Yes',
                                   style: TextStyle(color: Colors.green),

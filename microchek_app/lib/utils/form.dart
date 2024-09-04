@@ -16,7 +16,7 @@ Widget buildTextFormField(
 }) {
   return TextFormField(
     controller: controller,
-    enabled: autofill! ? false : true,
+    enabled: autofill ? false : true,
     decoration: InputDecoration(
       labelText: label,
       prefixIcon: Icon(
@@ -271,7 +271,7 @@ void showAddUserForm(
                   },
                   autofill: autofill,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: ghanaCardController,
                   keyboardType: TextInputType.text,
@@ -283,7 +283,7 @@ void showAddUserForm(
                   decoration: InputDecoration(
                     labelText: 'Ghana Card Number',
                     hintText: 'GHA-000000000-0',
-                    prefixIcon: Icon(
+                    prefixIcon: const Icon(
                       Icons.credit_card,
                       color: Colors.amber,
                     ),
