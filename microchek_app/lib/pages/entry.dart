@@ -114,7 +114,7 @@ class _MyMicroPageState extends State<MyMicroPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Institution'),
+        title: Text('My Profile'),
         centerTitle: true,
       ),
       drawer: SampleDrawer(),

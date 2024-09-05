@@ -78,7 +78,7 @@ class SampleDrawer extends StatelessWidget {
                   leading: Icon(Icons.groups_rounded),
                   title: Center(
                       child: Text(
-                    'Persons',
+                    'People',
                     style: Theme.of(context).textTheme.titleMedium,
                   )),
                   onTap: () async {
@@ -94,7 +94,7 @@ class SampleDrawer extends StatelessWidget {
                   leading: Icon(Icons.settings),
                   title: Center(
                       child: Text(
-                    'My Institution',
+                    'My Profile',
                     style: Theme.of(context).textTheme.titleMedium,
                   )),
                   onTap: () {

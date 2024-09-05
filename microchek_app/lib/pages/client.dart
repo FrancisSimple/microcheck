@@ -30,7 +30,7 @@ class _ClientPageState extends State<ClientPage> {
     if (instProvider.loadingState || currentInst == null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Persons'),
+          title: const Text('People'),
           centerTitle: true,
         ),
         drawer: const SampleDrawer(),
@@ -41,7 +41,7 @@ class _ClientPageState extends State<ClientPage> {
               TextField(
                 onChanged: _filterClients,
                 decoration: const InputDecoration(
-                  labelText: 'Search for Persons',
+                  labelText: 'Search for People',
                   prefixIcon: Icon(Icons.search, color: Colors.amber),
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
