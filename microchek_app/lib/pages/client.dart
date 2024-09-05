@@ -26,6 +26,7 @@ class _ClientPageState extends State<ClientPage> {
   Widget build(BuildContext context) {
     final instProvider = Provider.of<InstitutionProvider>(context);
     final currentInst = instProvider.currentInstitution;
+    final List<Client> filteredRecords = [];
 
     if (instProvider.loadingState || currentInst == null) {
       return Scaffold(
@@ -56,8 +57,9 @@ class _ClientPageState extends State<ClientPage> {
         ),
       );
     }
-
-    final filteredRecords = currentInst.allClients;
+    if (!instProvider.loadingState) {
+      
+    }
 
     return Scaffold(
       appBar: AppBar(
