@@ -464,6 +464,11 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         isValidGhanaCardNumber(_ghanaCardController.text)) {
       loadingDialog(context);
       _isValid = true;
+      setState(() {
+       // _isValid = _isValid;
+        _isFound = false;
+        _isCleared = false;
+      });
       debugPrint(_ghanaCardController.text);
 
       // Step 1: Check if the Ghana Card is within current institution
