@@ -335,14 +335,15 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                         return AlertDialog(
                                           title: Text('Considering Person'),
                                           content: Text(
-                                              'We are adding this person to the system. You can edit later?'),
+                                              'We are adding this person to the system. You can edit later'),
                                           actions: [
                                             TextButton(
                                                 onPressed: () {
                                                   Navigator.pop(context);
                                                   Navigator.pop(context);
                                                 },
-                                                child: Text('No')),
+                                                child: Text('Not save')),
+                                                SizedBox(),
                                             TextButton(
                                                 onPressed: () async {
                                                   loadingDialog(context);
@@ -386,7 +387,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                                                   Navigator.pop(context);
                                                   Navigator.pop(context);
                                                 },
-                                                child: Text('Yes')),
+                                                child: Text('Save')),
                                           ],
                                         );
                                       });
