@@ -1,10 +1,12 @@
 // utils/drawer.dart
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:microchek_app/pages/client.dart';
 import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/pages/entry.dart';
+import 'package:microchek_app/pages/login.dart';
 import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/loading.dart';
 import 'package:provider/provider.dart';
@@ -87,7 +89,7 @@ class SampleDrawer extends StatelessWidget {
                     // Navigator.pop(context);
                     Navigator.pop(context);
                     Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => ClientPage(uid: currentInst!.uid,allClients: currentInst.allClients!,))
+                        builder: (context) => ClientPage())
                         );
                   },
                 ),
@@ -123,10 +125,15 @@ class SampleDrawer extends StatelessWidget {
               'Logout',
               style: Theme.of(context).textTheme.titleMedium,
             )),
-            onTap: () {
-              Navigator.pop(context);
+            onTap: ()async {
+
+              //Navigator.pop(context);
+              
               loadingDialog(context);
+              await FirebaseAuth.instance.signOut();
               Navigator.pop(context);
+              Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => LoginPage()));
               // Implement your logout functionality here
             },
           ),

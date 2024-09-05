@@ -43,16 +43,19 @@ class _LoginPageState extends State<LoginPage> {
             
             InstitutionProvider institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
             debugPrint('Fetching data now');
-
-            Institution inst = await rawInstitutionData(user.uid);
-            inst.databaseClients = await fetchAllClientDataAsList();
-            institutionProvider.setCurrentInstitution(inst);
-            debugPrint('Done fetching');
-
+            institutionProvider.startLoad();
             Navigator.pop(context);
             Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) => GhanaCardValidationPage(),
             ));
+            
+            Institution inst = await rawInstitutionData(user.uid);
+            inst.allClients = await fetchClientDataAsList(user.uid);
+            institutionProvider.setCurrentInstitution(inst);
+            institutionProvider.stopLoad();
+            debugPrint('Done fetching');
+
+            
             
             debugPrint('done fetching');
             

@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 
 class GhanaCardValidationPage extends StatefulWidget {
   const GhanaCardValidationPage({super.key});
+  
 
   @override
   _GhanaCardValidationPageState createState() =>
@@ -22,15 +23,26 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
   final TextEditingController _ghanaCardController = TextEditingController();
   bool _isValid = false;
   bool _isFound = false;
-  bool _isCleared = false,isWithMe = false;
+  bool _isCleared = false,isWithMe = false,isLoading = true;
   Client? thisClient;
+
+  @override
+  void initState() {
+    super.initState();
+
+    
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
     InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
-    //fetchInstitutionData(currentInst!.uid, instProvider);
-    return Scaffold(
+
+    if (instProvider.loadingState || currentInst == null){
+      return Scaffold(
       appBar: AppBar(
         title: Text('Background Check'),
         centerTitle: true,
@@ -79,9 +91,10 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   SizedBox(height: 50),
                   ElevatedButton(
                     onPressed: () {
-                      validateGhanaCard(currentInst!);
+                      
+                      //validateGhanaCard(currentInst!);
                     },
-                    child: Text('Check'),
+                    child: Text('loading...'),
                   ),
                   if ((_isFound && _isCleared && _isValid) ||(_isValid && isWithMe && _isCleared) || (!_isFound && !isWithMe && _isValid))
                     Padding(
@@ -210,6 +223,179 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
       ),
     );
   }
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Background Check'),
+        centerTitle: true,
+      ),
+      drawer: SampleDrawer(),
+      body: Padding(
+        padding: const EdgeInsets.only(
+          left: 16.0,
+          right: 16.0,
+          bottom: 16,
+        ),
+        child: Center(
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUnfocus,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  TextFormField(
+                    controller: _ghanaCardController,
+                    keyboardType: TextInputType.text,
+                    maxLength: 15,
+                    onChanged: (value) {
+                      debugPrint(_ghanaCardController.text);
+                    },
+                    inputFormatters: [
+                      GhanaCardNumberFormatter(),
+                    ],
+                    decoration: InputDecoration(
+                      labelText: 'Ghana Card Number',
+                      hintText: 'GHA-000000000-0',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter the Ghana Card Number';
+                      } else if (!isValidGhanaCardNumber(value)) {
+                        return 'Invalid Ghana Card Number';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 50),
+                  ElevatedButton(
+                    onPressed: () {
+                      validateGhanaCard(currentInst);
+                    },
+                    child: Text('Check'),
+                  ),
+                  if ((_isFound && _isCleared && _isValid) ||(_isValid && isWithMe && _isCleared) || (!_isFound && !isWithMe && _isValid))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Text("Person is clear"),
+                    )
+                  else
+                    Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: !_isValid
+                            ? Text("")
+                            : Text(
+                                'Person not cleared!',
+                                style: TextStyle(
+                                  color:
+                                      !_isCleared ? Colors.red : Colors.green,
+                                  fontSize: 16,
+                                ),
+                              )),
+                  if ((_isFound && _isCleared && _isValid) ||(_isValid && isWithMe && _isCleared)|| (!_isFound && _isValid))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text("Are you considering this person?"),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(),
+                              ElevatedButton(
+                                onPressed: () async {
+                                  loadingDialog(context);
+                                  debugPrint("Clear: $_isCleared");
+                                  debugPrint("found: $_isFound");
+                                  debugPrint("valid: $_isValid");
+                                  debugPrint("withme: $isWithMe");
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Considering Person'),
+                                          content: Text(
+                                              'We are adding this person to the system. You can edit later?'),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('No')),
+                                            TextButton(
+                                                onPressed: () async {
+                                                  loadingDialog(context);
+                                                  try {
+                                                    debugPrint('size before: ${currentInst.allClients!.length}');
+                                                    await addInstToClient(_ghanaCardController.text.trim(),currentInst.uid,'Under Consideration');
+                                                        
+                                                        
+                                                        
+                                                    
+                                                    Client client = await fetchDirectClientData(_ghanaCardController.text.trim(),currentInst.uid);
+                                                    Navigator.pop(context);
+                                                   
+                                                    instProvider.currentInstitution!.replaceClient(client);
+                                                    instProvider.setCurrentInstitution(currentInst);
+                                                    debugPrint('size after: ${currentInst.allClients!.length}');
+                                                  } catch (e) {
+                                                    debugPrint(
+                                                        'error message here: $e');
+                                                  }
+                                                  
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                        content: Text(
+                                                            'Person added successfully')),
+                                                  );
+                                                  Navigator.pop(context);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('Yes')),
+                                          ],
+                                        );
+                                      });
+                                },
+                                child: Text(
+                                  'Yes',
+                                  style: TextStyle(color: Colors.green),
+                                ),
+                              ),
+                              SizedBox(),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  if ((_isFound && !_isCleared && _isValid) ||(_isValid && isWithMe && !_isCleared))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 20.0),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          //loadingDialog(context);
+                          _showCompanyDetails(
+                              context, thisClient!.allInstitutions!);
+                          //Navigator.of(context).pop();
+                          //Navigator.of(context).pop();
+                        },
+                        child: Text('View Institution Details'),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   bool isValidGhanaCardNumber(String number) {
     // Implement your validation logic here.
@@ -220,69 +406,63 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
 
   void validateGhanaCard(Institution inst) async {
     if (_formKey.currentState?.validate() ?? false) {
+
       loadingDialog(context);
       _isValid = true;
       debugPrint(_ghanaCardController.text);
 
-      // Step 1: Check if the Ghana Card is in the database
-      for (Client client in inst.databaseClients!) {
+      // Step 1: Check if the Ghana Card is within current institution
+      for (Client client in inst.allClients!) {
         if (client.cardNumber == _ghanaCardController.text.trim()) {
+          isWithMe = true;
           _isFound = true;
           thisClient = client;
           debugPrint('Client found in database.');
           //  _ghanaCardController.clear();
           break;
         }
+
         setState(() {
+          isWithMe = false;
           _isFound = false;
         });
       }
 
-      for (Client client3 in inst.allClients!) {
-        if (client3.cardNumber == _ghanaCardController.text.trim()) {
-          isWithMe = true;
-          thisClient = client3;
-          debugPrint('Client found with me:');
-          //  _ghanaCardController.clear();
-          break;
+      //if member not part of current institution, we check if it is present in the system
+      if(!isWithMe){
+        //document to the particular client in database
+        final doc = await FirebaseFirestore.instance.collection('clients').doc(_ghanaCardController.text.trim()).get();
+        if(await doc.exists){
+          //client is declared found when this document exists
+          _isFound = true;
+          //client is fetched from database
+          thisClient = await fetchClientData(_ghanaCardController.text.trim());
         }
-        setState(() {
-          isWithMe = false;
-        });
+        else{
+          _isCleared = true;
+        }
       }
 
-      if (_isFound || isWithMe) {
+      if (_isFound) {
+        //when found, we check for clearance
         _isCleared = true;
+        for (Institution inst in thisClient!.allInstitutions!){
 
-        // Step 2: Check if this client has been cleared
-        for (Client client2 in inst.allClients!) {
-          if (client2.cardNumber == thisClient!.cardNumber) {
-            debugPrint('client matches: ${client2.cardNumber} and ${inst.uid}');
-            thisClient =
-                await fetchDirectClientData(client2.cardNumber, inst.uid);
-            //  _ghanaCardController.clear();
-            debugPrint('fetched direct client');
-            for (Institution inst in thisClient!.allInstitutions!) {
-              debugPrint(
-                  'entered the loop for all institutions of this new client fetched');
-              if (inst.status != "Clear") {
-                _isCleared = false;
-                debugPrint('clear data updated');
-                break;
-              }
+            if(inst.status != "Clear"){
+
+              _isCleared = false;
+              break;
+
             }
-
-            break;
           }
-        }
+
+          
+        
 
         // Additional debug info
         debugPrint('Client clearance status: $_isCleared');
       } 
-      else {
-        _isCleared = true; // No record means no issues found
-      }
-
+      
       // Update UI
       setState(() {
         _isValid = _isValid;
@@ -290,21 +470,20 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         _isCleared = _isCleared;
       });
 
-      Navigator.of(context).pop(); // Close loading dialog
-    } else {
+      Navigator.of(context).pop();
+    } 
+    else {
       setState(() {
         _isValid = false;
         _isFound = false;
         _isCleared = false;
       });
     }
-    // _ghanaCardController.clear();
+   
   }
 
-  // bool _checkIfUserExists(String cardNumber) {
-  //   return cardNumber == "GHA-123456789-0"; // Example Ghana Card number
-  // }
-
+ 
+//================FUNCTION TO DISPLAY ALL INSTUTIONS IN THE NAME OF CLIENT
   void _showCompanyDetails(BuildContext context, List<Institution> allInsts) {
     showDialog(
       context: context,
@@ -537,7 +716,7 @@ Future<List<Client>> fetchClientDataAsList(String instId) async {
     for (QueryDocumentSnapshot document in querySnapshot.docs) {
       // Get the data as a map
       if (document.id != 'default') {
-        Client dataMap = await fetchClientData(document.id);
+        Client dataMap = await fetchDirectClientData(document.id,instId);
 
         // Add the map to the list
         dataList.add(dataMap);

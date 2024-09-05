@@ -358,32 +358,31 @@ void showAddUserForm(
               if (formKey.currentState?.validate() ?? false) {
                 loadingDialog(context);
                 try {
-                  await addInstToClient(ghanaCardController.text.trim(),
-                      institution.uid, 'Under Consideration',
-                      name: nameController.text.trim());
+                  if(await addNewClient(ghanaCardController.text.trim(),institution.uid, 'Under Consideration',name: nameController.text.trim())){
+                    Client client = await fetchDirectClientData(ghanaCardController.text.trim(), institution.uid);
+                    Navigator.pop(context);
+                 
+                    instProvider.currentInstitution!.replaceClient(client);
+                    instProvider.setCurrentInstitution(institution);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Person added successfully')),);
+                    Navigator.pop(context);
 
-                  //currentInst.replaceClient(client);
+                  }
+                  else{
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('This person already exists')),);
+                    Navigator.pop(context);
+                  }
+                  
 
-                  Client client = await fetchDirectClientData(
-                      ghanaCardController.text.trim(), institution.uid);
-                  Navigator.pop(context);
-                  // setState(() {
-                  //   currentInst.replaceClient(
-                  //       client);
-                  // });
+                  
 
-                  instProvider.currentInstitution!.replaceClient(client);
-                  instProvider.setCurrentInstitution(institution);
-                  debugPrint('size after: ${institution.allClients!.length}');
-                } catch (e) {
+                  
+                } catch (e,stack) {
                   debugPrint('error message here: $e');
+                  debugPrint('error message here: $stack');
                 }
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Person added successfully')),
-                );
-                // Navigator.pop(context);
-                Navigator.pop(context);
+                
               }
             },
           ),
