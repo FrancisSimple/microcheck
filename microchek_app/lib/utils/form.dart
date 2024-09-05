@@ -227,8 +227,7 @@ void showAddUserForm(
   final formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ghanaCardController =
-      TextEditingController(text: controllerText);
-  final TextEditingController phoneController = TextEditingController();
+  TextEditingController(text: controllerText);
   String? selectedStatus;
 
   showDialog(
@@ -358,31 +357,29 @@ void showAddUserForm(
               if (formKey.currentState?.validate() ?? false) {
                 loadingDialog(context);
                 try {
-                  if(await addNewClient(ghanaCardController.text.trim(),institution.uid, 'Under Consideration',name: nameController.text.trim())){
-                    Client client = await fetchDirectClientData(ghanaCardController.text.trim(), institution.uid);
+                  if (await addNewClient(ghanaCardController.text.trim(),
+                      institution.uid, 'Under Consideration',
+                      name: nameController.text.trim())) {
+                    Client client = await fetchDirectClientData(
+                        ghanaCardController.text.trim(), institution.uid);
                     Navigator.pop(context);
-                 
+
                     instProvider.currentInstitution!.replaceClient(client);
                     instProvider.setCurrentInstitution(institution);
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Person added successfully')),);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Person added successfully')),
+                    );
                     Navigator.pop(context);
-
-                  }
-                  else{
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('This person already exists')),);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('This person already exists')),
+                    );
                     Navigator.pop(context);
                   }
-                  
-
-                  
-
-                  
-                } catch (e,stack) {
+                } catch (e, stack) {
                   debugPrint('error message here: $e');
                   debugPrint('error message here: $stack');
                 }
-
-                
               }
             },
           ),

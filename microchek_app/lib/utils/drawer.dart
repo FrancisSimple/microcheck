@@ -7,9 +7,8 @@ import 'package:microchek_app/pages/client.dart';
 import 'package:microchek_app/pages/dashboard.dart';
 import 'package:microchek_app/pages/entry.dart';
 import 'package:microchek_app/pages/login.dart';
-import 'package:microchek_app/user_configure.dart';
 import 'package:microchek_app/utils/loading.dart';
-import 'package:provider/provider.dart';
+
 
 // import 'package:flutter/material.dart';
 
@@ -18,8 +17,7 @@ class SampleDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider = Provider.of<InstitutionProvider>(context, listen: true);
-    final currentInst = instProvider.currentInstitution;
+
     return Drawer(
       child: Column(
         children: [
@@ -85,12 +83,11 @@ class SampleDrawer extends StatelessWidget {
                   )),
                   onTap: () async {
                     // loadingDialog(context);
-                    
+
                     // Navigator.pop(context);
                     Navigator.pop(context);
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => ClientPage())
-                        );
+                    Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (context) => ClientPage()));
                   },
                 ),
                 ListTile(
@@ -125,15 +122,14 @@ class SampleDrawer extends StatelessWidget {
               'Logout',
               style: Theme.of(context).textTheme.titleMedium,
             )),
-            onTap: ()async {
-
+            onTap: () async {
               //Navigator.pop(context);
-              
+
               loadingDialog(context);
               await FirebaseAuth.instance.signOut();
               Navigator.pop(context);
               Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (context) => LoginPage()));
+                  MaterialPageRoute(builder: (context) => LoginPage()));
               // Implement your logout functionality here
             },
           ),

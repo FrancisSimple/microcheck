@@ -40,28 +40,23 @@ class _LoginPageState extends State<LoginPage> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('You are in. Fetching your data...')),
             );
-            
-            InstitutionProvider institutionProvider = Provider.of<InstitutionProvider>(context, listen: false);
+
+            InstitutionProvider institutionProvider =
+                Provider.of<InstitutionProvider>(context, listen: false);
             debugPrint('Fetching data now');
             institutionProvider.startLoad();
             Navigator.pop(context);
             Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) => GhanaCardValidationPage(),
             ));
-            
+
             Institution inst = await rawInstitutionData(user.uid);
             inst.allClients = await fetchClientDataAsList(user.uid);
             institutionProvider.setCurrentInstitution(inst);
             institutionProvider.stopLoad();
             debugPrint('Done fetching');
 
-            
-            
             debugPrint('done fetching');
-            
-            
-
-            
           } else {
             Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) =>

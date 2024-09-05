@@ -8,8 +8,6 @@ import 'package:microchek_app/utils/loading.dart';
 
 class ClientPage extends StatefulWidget {
   const ClientPage({super.key});
-  
-  
 
   @override
   State<ClientPage> createState() => _ClientPageState();
@@ -18,11 +16,10 @@ class ClientPage extends StatefulWidget {
 class _ClientPageState extends State<ClientPage> {
   List<Client> filteredRecords = [];
   bool isLoading = true;
-  final List<Client> allClients =[];
+  final List<Client> allClients = [];
   @override
   void initState() {
     super.initState();
-    
   }
 
   @override
@@ -31,7 +28,38 @@ class _ClientPageState extends State<ClientPage> {
     final currentInst = instProvider.currentInstitution;
 
     if (instProvider.loadingState || currentInst == null) {
-          return Scaffold(
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Persons'),
+          centerTitle: true,
+        ),
+        drawer: const SampleDrawer(),
+        body: Padding(
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+          child: Column(
+            children: [
+              TextField(
+                onChanged: _filterClients,
+                decoration: const InputDecoration(
+                  labelText: 'Search for Persons',
+                  prefixIcon: Icon(Icons.search, color: Colors.amber),
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              const Expanded(
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final filteredRecords = currentInst.allClients;
+
+    return Scaffold(
       appBar: AppBar(
         title: const Text('Persons'),
         centerTitle: true,
@@ -51,42 +79,9 @@ class _ClientPageState extends State<ClientPage> {
               ),
             ),
             const SizedBox(height: 16.0),
-            const Expanded(
-              child: Center(child: CircularProgressIndicator()),
-            ),
-          ],
-        ),
-      ),
-     
-    );
-  }
-      
-    
-
-    final filteredRecords = currentInst.allClients;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Persons'),
-        centerTitle: true,
-      ),
-      drawer:const  SampleDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-        child: Column(
-          children: [
-            TextField(
-              onChanged: _filterClients,
-              decoration: const InputDecoration(
-                labelText: 'Search for Persons',
-                prefixIcon: Icon(Icons.search, color: Colors.amber),
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-              ),
-            ),
-            const SizedBox(height: 16.0),
             Expanded(
-              child: buildClientTable(context, filteredRecords!, currentInst, instProvider),
+              child: buildClientTable(
+                  context, filteredRecords!, currentInst, instProvider),
             ),
           ],
         ),
@@ -102,12 +97,13 @@ class _ClientPageState extends State<ClientPage> {
           setState(() {}); // Update the state after adding user
         },
         tooltip: 'Add Person',
-        child:const  Icon(Icons.person_add),
+        child: const Icon(Icons.person_add),
       ),
     );
   }
 
-  Widget buildClientTable(BuildContext context, List<Client> records, Institution inst, InstitutionProvider instProvider) {
+  Widget buildClientTable(BuildContext context, List<Client> records,
+      Institution inst, InstitutionProvider instProvider) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: SingleChildScrollView(
@@ -131,7 +127,8 @@ class _ClientPageState extends State<ClientPage> {
                 DataCell(
                   ElevatedButton(
                     onPressed: () {
-                      _showEditClientDialog(context, records[index], inst, instProvider);
+                      _showEditClientDialog(
+                          context, records[index], inst, instProvider);
                     },
                     child: const Text('Update'),
                   ),
@@ -154,9 +151,11 @@ class _ClientPageState extends State<ClientPage> {
     });
   }
 
-  void _showEditClientDialog(BuildContext context, Client client, Institution inst, InstitutionProvider instProvider) {
+  void _showEditClientDialog(BuildContext context, Client client,
+      Institution inst, InstitutionProvider instProvider) {
     final formKey = GlobalKey<FormState>();
-    final TextEditingController nameController = TextEditingController(text: client.name);
+    final TextEditingController nameController =
+        TextEditingController(text: client.name);
     //final TextEditingController ghanaCardController = TextEditingController(text: client.cardNumber);
     String? selectedStatus;
 
@@ -167,20 +166,23 @@ class _ClientPageState extends State<ClientPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          title: const Text('Update Person Info', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          title: const Text('Update Person Info',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Form(
               key: formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  buildTextFormField('Name', Icons.person, controller: nameController),
+                  buildTextFormField('Name', Icons.person,
+                      controller: nameController),
                   const SizedBox(height: 20),
                   DropdownButtonFormField<String>(
                     value: selectedStatus,
                     decoration: InputDecoration(
                       labelText: 'Application Status',
-                      prefixIcon: const Icon(Icons.assignment, color: Colors.amber),
+                      prefixIcon:
+                          const Icon(Icons.assignment, color: Colors.amber),
                       filled: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -194,7 +196,8 @@ class _ClientPageState extends State<ClientPage> {
                     ].map((String status) {
                       return DropdownMenuItem<String>(
                         value: status,
-                        child: Text(status, style: Theme.of(context).textTheme.bodySmall),
+                        child: Text(status,
+                            style: Theme.of(context).textTheme.bodySmall),
                       );
                     }).toList(),
                     onChanged: (newValue) {
@@ -215,7 +218,8 @@ class _ClientPageState extends State<ClientPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Cancel', style: TextStyle(color: Colors.redAccent)),
+              child: const Text('Cancel',
+                  style: TextStyle(color: Colors.redAccent)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -232,7 +236,9 @@ class _ClientPageState extends State<ClientPage> {
                     inst.replaceClient(client);
                     instProvider.setCurrentInstitution(inst);
                   });
-                  await addInstToClient(client.cardNumber, inst.uid, selectedStatus!, name: client.name);
+                  await addInstToClient(
+                      client.cardNumber, inst.uid, selectedStatus!,
+                      name: client.name);
                   Navigator.of(context).pop();
                 }
               },

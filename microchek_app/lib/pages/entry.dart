@@ -17,102 +17,100 @@ class MyMicroPage extends StatefulWidget {
 class _MyMicroPageState extends State<MyMicroPage> {
   @override
   Widget build(BuildContext context) {
-    InstitutionProvider instProvider =Provider.of<InstitutionProvider>(context, listen: true);
+    InstitutionProvider instProvider =
+        Provider.of<InstitutionProvider>(context, listen: true);
     final currentInst = instProvider.currentInstitution;
-    if (instProvider.loadingState || currentInst == null){
+    if (instProvider.loadingState || currentInst == null) {
       return Scaffold(
-      appBar: AppBar(
-        title: Text('My Institution'),
-        centerTitle: true,
-      ),
-      drawer: SampleDrawer(),
-      body: Padding(
-        padding: const EdgeInsets.only(
-          left: 16.0,
-          right: 16.0,
-          // bottom: 16,
+        appBar: AppBar(
+          title: Text('My Institution'),
+          centerTitle: true,
         ),
-        child: ListView(
-          children: <Widget>[
-            SizedBox(height: 20),
-            Center(
-              child: CircleAvatar(
-                radius: 40,
-                child: Icon(
-                  Icons.account_balance,
+        drawer: SampleDrawer(),
+        body: Padding(
+          padding: const EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            // bottom: 16,
+          ),
+          child: ListView(
+            children: <Widget>[
+              SizedBox(height: 20),
+              Center(
+                child: CircleAvatar(
+                  radius: 40,
+                  child: Icon(
+                    Icons.account_balance,
+                  ),
+                  // backgroundImage: AssetImage('assets/logo.png'), // Add a logo or relevant image
                 ),
-                // backgroundImage: AssetImage('assets/logo.png'), // Add a logo or relevant image
               ),
-            ),
-            SizedBox(height: 20),
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              elevation: 5,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    buildInfoRow(
-                        Icons.business, 'Institution Name', 'Loading...'),
-                    buildDivider(),
-                    buildInfoRow(
-                        Icons.location_on, 'Location', 'Loading...'),
-                    buildDivider(),
-                    buildInfoRow(Icons.phone, 'Contact', 'Loading...'),
-                    buildDivider(),
-                    buildInfoRow(Icons.email, 'Email', 'Loading...'),
-                    // buildDivider(),
-                    // buildInfoRow(Icons.calendar_today, 'Registered Since',
-                    //     'January 1, 2020'),
-                    SizedBox(height: 20),
-                    Center(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
+              SizedBox(height: 20),
+              Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
+                ),
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      buildInfoRow(
+                          Icons.business, 'Institution Name', 'Loading...'),
+                      buildDivider(),
+                      buildInfoRow(Icons.location_on, 'Location', 'Loading...'),
+                      buildDivider(),
+                      buildInfoRow(Icons.phone, 'Contact', 'Loading...'),
+                      buildDivider(),
+                      buildInfoRow(Icons.email, 'Email', 'Loading...'),
+                      // buildDivider(),
+                      // buildInfoRow(Icons.calendar_today, 'Registered Since',
+                      //     'January 1, 2020'),
+                      SizedBox(height: 20),
+                      Center(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            // // loadingDialog(context);
+                            // // Implement edit profile functionality here
+                            // showDialog(
+                            //   context: context,
+                            //   builder: (BuildContext context) {
+                            //     return EditProfilePopup(currentInst: currentInst,instPro: instProvider,);
+                            //   },
+                            // );
+                            // setState(() {
 
-                          // // loadingDialog(context);
-                          // // Implement edit profile functionality here
-                          // showDialog(
-                          //   context: context,
-                          //   builder: (BuildContext context) {
-                          //     return EditProfilePopup(currentInst: currentInst,instPro: instProvider,);
-                          //   },
-                          // );
-                          // setState(() {
-
-                          //   currentInst.name = instProvider.currentInstitution!.name;
-                          //   currentInst.location = instProvider.currentInstitution!.location;
-                          //   currentInst.contact = instProvider.currentInstitution!.contact;
-                          // });
-                          // instProvider.setCurrentInstitution(currentInst);
-                          // // Navigator.of(context).pop();
-                        },
-                        icon: Icon(
-                          Icons.edit,
-                          color: Colors.amber,
-                        ),
-                        label: Text('Edit Profile'),
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            //   currentInst.name = instProvider.currentInstitution!.name;
+                            //   currentInst.location = instProvider.currentInstitution!.location;
+                            //   currentInst.contact = instProvider.currentInstitution!.contact;
+                            // });
+                            // instProvider.setCurrentInstitution(currentInst);
+                            // // Navigator.of(context).pop();
+                          },
+                          icon: Icon(
+                            Icons.edit,
+                            color: Colors.amber,
+                          ),
+                          label: Text('Edit Profile'),
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -150,7 +148,7 @@ class _MyMicroPageState extends State<MyMicroPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     buildInfoRow(
-                        Icons.business, 'Institution Name', currentInst!.name),
+                        Icons.business, 'Institution Name', currentInst.name),
                     buildDivider(),
                     buildInfoRow(
                         Icons.location_on, 'Location', currentInst.location),
@@ -170,14 +168,19 @@ class _MyMicroPageState extends State<MyMicroPage> {
                           showDialog(
                             context: context,
                             builder: (BuildContext context) {
-                              return EditProfilePopup(currentInst: currentInst,instPro: instProvider,);
+                              return EditProfilePopup(
+                                currentInst: currentInst,
+                                instPro: instProvider,
+                              );
                             },
                           );
                           setState(() {
-
-                            currentInst.name = instProvider.currentInstitution!.name;
-                            currentInst.location = instProvider.currentInstitution!.location;
-                            currentInst.contact = instProvider.currentInstitution!.contact;
+                            currentInst.name =
+                                instProvider.currentInstitution!.name;
+                            currentInst.location =
+                                instProvider.currentInstitution!.location;
+                            currentInst.contact =
+                                instProvider.currentInstitution!.contact;
                           });
                           instProvider.setCurrentInstitution(currentInst);
                           // Navigator.of(context).pop();
