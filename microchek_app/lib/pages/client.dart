@@ -14,12 +14,25 @@ class ClientPage extends StatefulWidget {
 }
 
 class _ClientPageState extends State<ClientPage> {
-  List<Client> filteredRecords = [];
+  List<Client>? filteredRecords = [];
+  List<Client>? allClients = [];
   bool isLoading = true;
-  final List<Client> allClients = [];
+
   @override
   void initState() {
     super.initState();
+    // Initialize clients list when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final instProvider =
+          Provider.of<InstitutionProvider>(context, listen: false);
+      if (instProvider.currentInstitution != null) {
+        setState(() {
+          allClients = instProvider.currentInstitution!.allClients;
+          filteredRecords = allClients; // Initially, show all clients
+          isLoading = false;
+        });
+      }
+    });
   }
 
   @override
@@ -27,38 +40,31 @@ class _ClientPageState extends State<ClientPage> {
     final instProvider = Provider.of<InstitutionProvider>(context);
     final currentInst = instProvider.currentInstitution;
 
-    if (instProvider.loadingState || currentInst == null) {
+    if (instProvider.loadingState && isLoading && currentInst == null) {
+      debugPrint("Provider loading: ${instProvider.loadingState}");
+      debugPrint("Loading: ${isLoading}");
       return Scaffold(
         appBar: AppBar(
           title: const Text('Persons'),
           centerTitle: true,
         ),
         drawer: const SampleDrawer(),
-        body: Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
-          child: Column(
-            children: [
-              TextField(
-                onChanged: _filterClients,
-                decoration: const InputDecoration(
-                  labelText: 'Search for Persons',
-                  prefixIcon: Icon(Icons.search, color: Colors.amber),
-                  border: OutlineInputBorder(),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              const Expanded(
-                child: Center(child: CircularProgressIndicator()),
-              ),
-            ],
-          ),
+        body: const Center(
+          child: CircularProgressIndicator(),
         ),
       );
+    } else {
+       if (instProvider.currentInstitution != null) {
+        setState(() {
+          allClients = instProvider.currentInstitution!.allClients;
+          filteredRecords = allClients; // Initially, show all clients
+          isLoading = false;
+        });
+      }
     }
 
-    final filteredRecords = currentInst.allClients;
-
+    debugPrint("Provider loading: ${instProvider.loadingState}");
+    debugPrint("Loading: ${isLoading}");
     return Scaffold(
       appBar: AppBar(
         title: const Text('Persons'),
@@ -66,7 +72,7 @@ class _ClientPageState extends State<ClientPage> {
       ),
       drawer: const SampleDrawer(),
       body: Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
             TextField(
@@ -81,7 +87,11 @@ class _ClientPageState extends State<ClientPage> {
             const SizedBox(height: 16.0),
             Expanded(
               child: buildClientTable(
-                  context, filteredRecords!, currentInst, instProvider),
+                context,
+                filteredRecords!,
+                currentInst!,
+                instProvider,
+              ),
             ),
           ],
         ),
@@ -94,7 +104,10 @@ class _ClientPageState extends State<ClientPage> {
             instProvider,
             autofill: false,
           );
-          setState(() {}); // Update the state after adding user
+          setState(() {
+            allClients = currentInst.allClients;
+            filteredRecords = allClients;
+          }); // Update the state after adding a user
         },
         tooltip: 'Add Person',
         child: const Icon(Icons.person_add),
@@ -102,6 +115,18 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
+  // Filter clients based on search query
+  void _filterClients(String query) {
+    final lowerQuery = query.toLowerCase();
+    setState(() {
+      filteredRecords = allClients!.where((client) {
+        return client.name.toLowerCase().contains(lowerQuery) ||
+            client.cardNumber.toLowerCase().contains(lowerQuery);
+      }).toList();
+    });
+  }
+
+  // Build client table
   Widget buildClientTable(BuildContext context, List<Client> records,
       Institution inst, InstitutionProvider instProvider) {
     return SingleChildScrollView(
@@ -141,22 +166,12 @@ class _ClientPageState extends State<ClientPage> {
     );
   }
 
-  void _filterClients(String query) {
-    final lowerQuery = query.toLowerCase();
-    setState(() {
-      filteredRecords = allClients.where((client) {
-        return client.name.toLowerCase().contains(lowerQuery) ||
-            client.cardNumber.toLowerCase().contains(lowerQuery);
-      }).toList();
-    });
-  }
-
+  // Show edit client dialog
   void _showEditClientDialog(BuildContext context, Client client,
       Institution inst, InstitutionProvider instProvider) {
     final formKey = GlobalKey<FormState>();
     final TextEditingController nameController =
         TextEditingController(text: client.name);
-    //final TextEditingController ghanaCardController = TextEditingController(text: client.cardNumber);
     String? selectedStatus;
 
     showDialog(
@@ -250,6 +265,7 @@ class _ClientPageState extends State<ClientPage> {
   }
 }
 
+// Helper function to format date
 String formatDate(String dateInString) {
   DateTime datetime = DateTime.parse(dateInString);
   DateFormat formatter = DateFormat('MMMM dd, yyyy');

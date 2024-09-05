@@ -77,7 +77,11 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                       validator: (value) {
                         if (value == null || value.isEmpty) {
                           return 'Please enter the Ghana Card Number';
-                        } else if (!isValidGhanaCardNumber(value)) {
+                        } else if (!isValidGhanaCardNumber(value) ||
+                            value.length < 15) {
+                          // setState(() {
+                          //   _isValid = false;
+                          // });
                           return 'Invalid Ghana Card Number';
                         }
                         return null;
@@ -284,7 +288,16 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
                   SizedBox(height: 50),
                   ElevatedButton(
                     onPressed: () {
+                      debugPrint("Clear: $_isCleared");
+                      debugPrint("found: $_isFound");
+                      debugPrint("valid: $_isValid");
+                      debugPrint("withme: $isWithMe");
+                      debugPrint("After");
                       validateGhanaCard(currentInst);
+                      debugPrint("Clear: $_isCleared");
+                      debugPrint("found: $_isFound");
+                      debugPrint("valid: $_isValid");
+                      debugPrint("withme: $isWithMe");
                     },
                     child: Text('Check'),
                   ),
@@ -430,11 +443,25 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
     // Implement your validation logic here.
     String pattern = r'GHA-\d{9}-\d{1}$';
     RegExp regExp = RegExp(pattern);
+
+    // Add some logging to see what's happening on Android
+    debugPrint('Input value: $number');
+    debugPrint('Regex pattern: $pattern');
+    debugPrint('Has match: ${regExp.hasMatch(number)}');
+    // print('Match result: $isValid');
+
     return regExp.hasMatch(number);
   }
 
   void validateGhanaCard(Institution inst) async {
-    if (_formKey.currentState?.validate() ?? false) {
+    // setState(() {
+    //       isWithMe = false;
+    //       _isFound = false;
+    //       _isValid = false;
+    //       _isCleared = false;
+    //     });
+    if (_formKey.currentState!.validate() &&
+        isValidGhanaCardNumber(_ghanaCardController.text)) {
       loadingDialog(context);
       _isValid = true;
       debugPrint(_ghanaCardController.text);
@@ -453,6 +480,8 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
         setState(() {
           isWithMe = false;
           _isFound = false;
+          // _isValid = false;
+          // _isCleared = false;
         });
       }
 

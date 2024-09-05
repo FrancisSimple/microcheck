@@ -227,7 +227,7 @@ void showAddUserForm(
   final formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ghanaCardController =
-  TextEditingController(text: controllerText);
+      TextEditingController(text: controllerText);
   String? selectedStatus;
 
   showDialog(
@@ -504,6 +504,21 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
       ),
       actions: [
         ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
+          child: const Text(
+            'Cancel',
+            style: TextStyle(color: Colors.redAccent),
+          ),
+        ),
+        ElevatedButton(
           onPressed: () async {
             if (_formKey.currentState!.validate()) {
               // Save the profile changes
@@ -532,21 +547,6 @@ class _EditProfilePopupState extends State<EditProfilePopup> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           ),
           child: const Text('Save'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          style: ElevatedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          child: const Text(
-            'Cancel',
-            style: TextStyle(color: Colors.redAccent),
-          ),
         ),
       ],
     );
