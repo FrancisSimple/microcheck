@@ -16,17 +16,26 @@ class ClientPage extends StatefulWidget {
 class _ClientPageState extends State<ClientPage> {
   List<Client> filteredRecords = [];
   bool isLoading = true;
-  final List<Client> allClients = [];
-  @override
+  // final List<Client> allClients = [];
+
+
+ @override
   void initState() {
     super.initState();
+    // The filteredRecords will initially be the same as the full client list
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final clientRecords = Provider.of<InstitutionProvider>(context, listen: false).currentInstitution!.allClients;
+      setState(() {
+        filteredRecords = clientRecords!;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final instProvider = Provider.of<InstitutionProvider>(context);
     final currentInst = instProvider.currentInstitution;
-    final List<Client> filteredRecords = [];
+    // final List<Client> filteredRecords = [];
 
     if (instProvider.loadingState || currentInst == null) {
       return Scaffold(
@@ -36,10 +45,11 @@ class _ClientPageState extends State<ClientPage> {
         ),
         drawer: const SampleDrawer(),
         body: Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 16),
           child: Column(
             children: [
               TextField(
+                enabled: false,
                 onChanged: _filterClients,
                 decoration: const InputDecoration(
                   labelText: 'Search for People',
@@ -68,7 +78,7 @@ class _ClientPageState extends State<ClientPage> {
       ),
       drawer: const SampleDrawer(),
       body: Padding(
-        padding: const EdgeInsets.only(left: 16.0, right: 16.0),
+        padding: const EdgeInsets.only(left: 16.0, right: 16.0 ,top: 16),
         child: Column(
           children: [
             TextField(
@@ -83,7 +93,7 @@ class _ClientPageState extends State<ClientPage> {
             const SizedBox(height: 16.0),
             Expanded(
               child: buildClientTable(
-                  context, filteredRecords!, currentInst, instProvider),
+                  context, filteredRecords.isNotEmpty ? filteredRecords : currentInst.allClients!, currentInst, instProvider),
             ),
           ],
         ),
@@ -146,9 +156,11 @@ class _ClientPageState extends State<ClientPage> {
   void _filterClients(String query) {
     final lowerQuery = query.toLowerCase();
     setState(() {
-      filteredRecords = allClients.where((client) {
+      filteredRecords = Provider.of<InstitutionProvider>(context, listen: false)
+          .currentInstitution!.allClients!.where((client) {
         return client.name.toLowerCase().contains(lowerQuery) ||
-            client.cardNumber.toLowerCase().contains(lowerQuery);
+            client.cardNumber.toLowerCase().contains(lowerQuery)
+            || client.contact.toLowerCase().contains(lowerQuery);
       }).toList();
     });
   }

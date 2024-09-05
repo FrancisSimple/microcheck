@@ -498,7 +498,7 @@ class _GhanaCardValidationPageState extends State<GhanaCardValidationPage> {
             .collection('clients')
             .doc(_ghanaCardController.text.trim())
             .get();
-        if (await doc.exists) {
+        if (doc.exists) {
           //client is declared found when this document exists
           _isFound = true;
           //client is fetched from database

@@ -367,12 +367,12 @@ void showAddUserForm(
                     instProvider.currentInstitution!.replaceClient(client);
                     instProvider.setCurrentInstitution(institution);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Person added successfully')),
+                      const SnackBar(content: Text('Person added successfully')),
                     );
                     Navigator.pop(context);
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('This person already exists')),
+                      const SnackBar(content: Text('This person already exists')),
                     );
                     Navigator.pop(context);
                   }
